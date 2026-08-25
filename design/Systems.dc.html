@@ -1,0 +1,162 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700&family=Geist:wght@100..900&display=swap">
+  <style>
+    body { margin: 0 }
+    a { color: inherit; text-decoration: none } a:hover { color: inherit }
+
+    .sy {
+      --surface: #0b0e16; --pure: #121826; --ink: #e8edfb; --muted: #8994ae;
+      --cobalt: #5b87ff; --hair: #1e2740;
+      --ease: cubic-bezier(.16, 1, .3, 1);
+      background: var(--surface); color: var(--ink);
+      font-family: "Geist", system-ui, sans-serif; font-size: 16px; line-height: 1.6;
+    }
+    .mono { font-family: "Geist Mono", ui-monospace, monospace }
+
+    .case {
+      display: grid; grid-template-columns: 1.1fr 4.2fr 5.7fr; gap: 2rem;
+      padding: clamp(2rem, 5vw, 4.5rem);
+      view-timeline: --case block;
+    }
+    .idx { position: sticky; top: 2.5rem; align-self: start }
+    .idx b { display: block; font-family: "Geist Mono", ui-monospace, monospace; font-size: 1.5rem; color: var(--cobalt); font-weight: 600 }
+    .idx em { display: block; font-style: normal; margin-top: .7rem; font-size: .85rem; font-weight: 620 }
+    .idx i  { display: block; font-style: normal; margin-top: .3rem; font-size: .65rem; color: var(--muted) }
+
+    .copy h3 { max-width: 10ch; margin: 0 0 2.4rem; font-size: clamp(2.4rem, 4.4vw, 4.2rem); font-weight: 620; letter-spacing: -.055em; line-height: .9; text-wrap: balance }
+    .step { padding: 1.6rem 0; border-top: 1px solid var(--hair); min-height: 26svh }
+    .step > span { font-family: "Geist Mono", ui-monospace, monospace; font-size: .6rem; letter-spacing: .07em; text-transform: uppercase; color: var(--cobalt) }
+    .step p {
+      margin: .8rem 0 0; max-width: 32rem; font-size: clamp(1rem, 1.35vw, 1.18rem);
+      letter-spacing: -.012em; line-height: 1.54; color: var(--ink);
+      animation: on linear both; animation-timeline: view(); animation-range: entry 100% cover 48%;
+    }
+    @keyframes on { from { opacity: .16; transform: translateY(18px); color: var(--muted) } to { opacity: 1; transform: none; color: var(--ink) } }
+    .tags { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 2.2rem }
+    .tags span { font-family: "Geist Mono", ui-monospace, monospace; font-size: .55rem; text-transform: uppercase; letter-spacing: .06em; padding: .4rem .62rem; border: 1px solid var(--hair); color: var(--muted) }
+    .metrics { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1.2rem }
+    .metrics span {
+      display: inline-flex; align-items: baseline; gap: .5rem;
+      font-family: "Geist Mono", ui-monospace, monospace; font-size: .58rem; letter-spacing: .05em;
+      padding: .45rem .7rem; border-left: 2px solid var(--cobalt); background: var(--pure); color: var(--muted);
+    }
+    .metrics b { font-size: .95rem; letter-spacing: -.02em; color: var(--cobalt); font-weight: 600 }
+
+    .map {
+      position: sticky; top: 2.5rem; align-self: start; height: 82svh;
+      background: var(--pure); border: 1px solid var(--hair); padding: 1.5rem;
+      display: flex; flex-direction: column;
+      background-image: linear-gradient(var(--hair) 1px, transparent 1px), linear-gradient(90deg, var(--hair) 1px, transparent 1px);
+      background-size: 3.5rem 3.5rem; background-position: 1.5rem 1.5rem;
+    }
+    .map figcaption { font-family: "Geist Mono", ui-monospace, monospace; font-size: .58rem; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); margin-bottom: .8rem }
+    .map .stage { position: relative; flex: 1 }
+    .map svg { position: absolute; inset: 0; width: 100%; height: 100% }
+
+    /* the panel is sticky, so these ride the ARTICLE's timeline, not their own */
+    .edge { stroke-dasharray: 340; stroke-dashoffset: 340; animation: draw linear both;
+      animation-timeline: --case; animation-range: contain 0% contain 60% }
+    @keyframes draw { to { stroke-dashoffset: 0 } }
+    .sname { font-family: "Geist Mono", ui-monospace, monospace; font-size: 10px; letter-spacing: .04em; fill: #8994ae }
+    .snode { transition: none }
+    .lit { animation: lit linear both; animation-timeline: --case; animation-range: contain 0% contain 55% }
+    @keyframes lit { from { opacity: .25 } to { opacity: 1 } }
+
+    /* CSS motion path: the event itself travels the graph as you scroll */
+    .packet {
+      position: absolute; left: 0; top: 0; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px;
+      border-radius: 50%; background: var(--cobalt);
+      box-shadow: 0 0 14px 3px color-mix(in oklab, var(--cobalt), transparent 40%);
+      offset-path: path("M 44 40 L 44 300 L 210 300 L 210 40 L 356 40");
+      offset-distance: 0%;
+      offset-rotate: 0deg;
+      animation: travel linear both; animation-timeline: --case; animation-range: contain 0% contain 92%;
+    }
+    @keyframes travel { from { offset-distance: 0% } to { offset-distance: 100% } }
+    .map .stage { --_pad: 0 }
+
+    .note {
+      margin: 0; padding: .9rem 0 0; border-top: 1px solid var(--hair);
+      font-family: "Geist Mono", ui-monospace, monospace; font-size: .56rem;
+      letter-spacing: .05em; line-height: 1.7; color: var(--muted); white-space: pre-line;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .sy, .sy * { animation: none !important }
+      .edge { stroke-dashoffset: 0 } .lit { opacity: 1 } .packet { offset-distance: 100% }
+      .step p { opacity: 1; transform: none; color: var(--ink) }
+    }
+    .sy.rm, .sy.rm * { animation: none !important }
+    .sy.rm .edge { stroke-dashoffset: 0 } .sy.rm .lit { opacity: 1 } .sy.rm .packet { offset-distance: 100% }
+    .sy.rm .step p { opacity: 1; transform: none; color: var(--ink) }
+
+    @media (max-width: 900px) {
+      .case { grid-template-columns: 1fr }
+      .map { position: static; height: 46svh; margin-top: 2rem }
+      .idx { position: static }
+    }
+  </style>
+</helmet>
+
+<div class="sy {{rm}}">
+  <article class="case">
+    <div class="idx"><b>01</b><em>Money in motion</em><i>Fintech &#183; Distributed systems</i></div>
+
+    <div class="copy">
+      <h3>Pix keys, without the uncertainty.</h3>
+      <div class="step"><span>01 / Context</span><p>A payment key looks simple. Behind it live ownership, claims, asynchronous events and reconciliation across multiple boundaries.</p></div>
+      <div class="step"><span>02 / Decision</span><p>Model consistency as a visible journey&#8212;not as the illusion of one synchronous request.</p></div>
+      <div class="step"><span>03 / Architecture</span><p>Event-driven state transitions, idempotent consumers and reconciliation paths keep every participant aligned.</p></div>
+      <div class="step"><span>04 / Outcome</span><p>Clear states across an asynchronous journey, with failure designed as part of the product&#8212;not hidden beneath it.</p></div>
+      <div class="tags"><span>Go</span><span>Kotlin</span><span>CQRS</span><span>PostgreSQL</span><span>SQS</span><span>Kubernetes</span></div>
+      <div class="metrics"><span><b>1 of 3</b> core platforms led end to end at iFood</span></div>
+    </div>
+
+    <figure class="map">
+      <figcaption>01 / Live system map</figcaption>
+      <div class="stage">
+        <svg viewBox="0 0 400 340" fill="none" preserveAspectRatio="xMidYMid meet">
+          <path class="edge" d="M44 62 L44 118" stroke="#8994ae" stroke-width="1.2"/>
+          <path class="edge" d="M44 152 L44 208" stroke="#8994ae" stroke-width="1.2"/>
+          <path class="edge" d="M44 242 L44 282" stroke="#8994ae" stroke-width="1.2"/>
+          <path class="edge" d="M44 300 L210 300 L210 40 L330 40" stroke="#5b87ff" stroke-width="1.5"/>
+          <path class="edge" d="M86 225 C 150 225 156 152 86 140" stroke="#5b87ff" stroke-width="1.1" stroke-dasharray="4 4" opacity=".75"/>
+
+          <rect class="snode lit" x="8" y="26" width="86" height="36" stroke="#5b87ff" stroke-width="1.3"/>
+          <rect class="snode lit" x="8" y="116" width="86" height="36" stroke="#8994ae" stroke-width="1"/>
+          <rect class="snode lit" x="8" y="206" width="86" height="36" stroke="#8994ae" stroke-width="1"/>
+          <rect class="snode lit" x="8" y="282" width="86" height="36" stroke="#8994ae" stroke-width="1"/>
+          <rect class="snode lit" x="330" y="22" width="66" height="36" stroke="#5b87ff" stroke-width="1.5"/>
+
+          <text class="sname" x="16" y="48">key.request</text>
+          <text class="sname" x="16" y="138">ownership</text>
+          <text class="sname" x="16" y="228">claim.open</text>
+          <text class="sname" x="16" y="304">reconcile</text>
+          <text class="sname" x="338" y="44" fill="#e8edfb">key.active</text>
+          <text class="sname" x="106" y="186" fill="#5b87ff">retry &#183; idempotent</text>
+          <text class="sname" x="218" y="176" fill="#8994ae">portability window</text>
+        </svg>
+        <span class="packet"></span>
+      </div>
+      <p class="note">one continuous map, not four panels.
+the event travels it on offset-path,
+scrubbed by the same scroll that reads the copy.</p>
+    </figure>
+  </article>
+</div>
+</x-dc>
+<script data-dc-script data-props='{"reducedMotion":{"editor":"boolean","default":false,"section":"Motion"},"$preview":{"width":1320,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() { return { rm: this.props.reducedMotion ? "rm" : "" }; }
+}
+</script>
+</body>
+</html>

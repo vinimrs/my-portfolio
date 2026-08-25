@@ -1,0 +1,303 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700&family=Geist:wght@100..900&display=swap">
+  <style>
+    body { margin: 0 }
+    a { color: inherit; text-decoration: none } a:hover { color: inherit }
+
+    .ms {
+      --surface: #f7f8fc; --pure: #fff; --ink: #111522; --muted: #5d6578;
+      --cobalt: #245bff; --hair: #ccd4e8; --wash: #e9eeff;
+      background: var(--surface); color: var(--ink);
+      font-family: "Geist", system-ui, sans-serif; font-size: 16px; line-height: 1.6;
+      padding: clamp(2rem, 5vw, 5rem);
+    }
+    .mono, code { font-family: "Geist Mono", ui-monospace, monospace }
+
+    .head { border-bottom: 1px solid var(--hair); padding-bottom: 2.2rem; margin-bottom: 2.6rem }
+    .kicker { font-family: "Geist Mono", ui-monospace, monospace; font-size: .62rem; font-weight: 640; letter-spacing: .1em; text-transform: uppercase; color: var(--cobalt) }
+    .head h1 { margin: 1rem 0 0; font-size: clamp(2.4rem, 5vw, 4.2rem); font-weight: 620; letter-spacing: -.055em; line-height: .92; max-width: 16ch }
+    .head p { margin: 1.2rem 0 0; color: var(--muted); max-width: 44rem }
+
+    .backbone {
+      display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+    .card { border: 1px solid var(--hair); background: var(--pure); padding: 1.3rem }
+    .card h4 { margin: 0 0 .6rem; font-family: "Geist Mono", ui-monospace, monospace; font-size: .62rem; letter-spacing: .08em; text-transform: uppercase; color: var(--cobalt) }
+    .card p { margin: 0; font-size: .85rem; line-height: 1.6; color: var(--muted) }
+    .card b { color: var(--ink); font-weight: 620 }
+
+    .rowhead, .row {
+      display: grid; grid-template-columns: 1.6fr 1.3fr 1.5fr 2.6fr; gap: 1.4rem;
+      padding: 1.35rem 0; border-bottom: 1px solid var(--hair); align-items: start;
+    }
+    .rowhead {
+      border-bottom: 1px solid var(--ink); padding-bottom: .7rem;
+      font-family: "Geist Mono", ui-monospace, monospace; font-size: .56rem;
+      letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
+    }
+    .row .act { font-family: "Geist Mono", ui-monospace, monospace; font-size: .58rem; letter-spacing: .07em; text-transform: uppercase; color: var(--cobalt); display: block; margin-bottom: .35rem }
+    .row .name { font-size: 1rem; font-weight: 640; letter-spacing: -.02em; display: block }
+    .row .what { font-size: .84rem; color: var(--muted); line-height: 1.55 }
+    .row .tl { font-family: "Geist Mono", ui-monospace, monospace; font-size: .62rem; line-height: 1.85; color: var(--ink) }
+    .row .tl u { text-decoration: none; color: var(--muted) }
+    pre {
+      margin: 0; padding: .85rem .95rem; background: var(--pure); border: 1px solid var(--hair);
+      font-family: "Geist Mono", ui-monospace, monospace; font-size: .615rem; line-height: 1.75;
+      overflow-x: auto; white-space: pre; color: var(--ink);
+    }
+    pre b { color: var(--cobalt); font-weight: 500 }
+
+    .foot { margin-top: 3rem; padding-top: 1.6rem; border-top: 1px solid var(--hair); display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 2.4rem }
+    .foot h4 { margin: 0 0 .7rem; font-family: "Geist Mono", ui-monospace, monospace; font-size: .62rem; letter-spacing: .08em; text-transform: uppercase; color: var(--cobalt) }
+    .foot ul { margin: 0; padding-left: 1.1rem; color: var(--muted); font-size: .86rem; line-height: 1.75 }
+    .foot code { background: var(--wash); padding: .1rem .3rem; font-size: .78rem }
+
+    @media (max-width: 1000px) {
+      .backbone { grid-template-columns: 1fr }
+      .rowhead { display: none }
+      .row { grid-template-columns: 1fr; gap: .7rem }
+      .foot { grid-template-columns: 1fr }
+    }
+  </style>
+</helmet>
+
+<div class="ms">
+  <div class="head">
+    <div class="kicker">Motion system &#183; implementation spec</div>
+    <h1>Every technique, where it fires, and the exact recipe.</h1>
+    <p>One signature technique per act &#8212; nothing repeats. Ranges are given in the <b class="mono">animation-range</b> syntax so they drop straight into <b class="mono">app/globals.css</b>.</p>
+  </div>
+
+  <div class="backbone">
+    <div class="card">
+      <h4>Backbone</h4>
+      <p><b>Native CSS scroll-driven animation</b> carries ~80% of the motion. <code>view()</code> and <code>scroll()</code> run off the main thread &#8212; no jank, no listeners, and reduced-motion is a one-line opt-out.</p>
+    </div>
+    <div class="card">
+      <h4>Where GSAP stays</h4>
+      <p>Three orchestrated sequences keep <b>ScrollTrigger</b>: the case-study step scrub, the chained research reveal, and any pinning. Everything else drops its JS.</p>
+    </div>
+    <div class="card">
+      <h4>Already proven here</h4>
+      <p><code>@supports (animation-timeline: view())</code> is <b>already used</b> in globals.css for <code>marker-track</code>. The idiom is established &#8212; this extends it rather than introducing it.</p>
+    </div>
+  </div>
+
+  <div class="rowhead">
+    <span>technique</span><span>what it does</span><span>timeline &#183; range</span><span>recipe</span>
+  </div>
+
+  <div class="row">
+    <div><span class="act">Hero</span><span class="name">Variable-font mass</span></div>
+    <div class="what">The name loses weight and tightens as it leaves &#8212; the type itself thins out instead of just sliding away.</div>
+    <div class="tl">view()<br><u>exit 0% &#8594; exit 100%</u></div>
+    <pre>@keyframes wordmass {
+  from { <b>font-variation-settings</b>: "wght" 760;
+         letter-spacing: -.065em }
+  to   { <b>font-variation-settings</b>: "wght" 300;
+         letter-spacing: -.085em; opacity: .35 }
+}
+.hero-word { animation: wordmass linear both;
+  <b>animation-timeline</b>: view();
+  <b>animation-range</b>: exit 0% exit 100% }</pre>
+  </div>
+
+  <div class="row">
+    <div><span class="act">Rail</span><span class="name">Live trace packet</span></div>
+    <div class="what">One object, three layers: the packet, three decaying echoes riding behind it, and a trail with data still flowing through the part already travelled. Nothing else lives on the rail.</div>
+    <div class="tl">scroll(root block)<br><u>full document</u></div>
+    <pre>.rail__trail, .rail__packet, .rail__echo {
+  animation-timeline: <b>scroll(root block)</b>; }
+@keyframes railfill { to { transform: scaleY(1) } }
+@keyframes railpk {
+  to { transform: translateY(calc(100vh - 26px)) } }
+
+/* echoes ride the same keyframes, offset by top */
+.rail__echo--1 { top: -15px; opacity: .5 }
+.rail__echo--2 { top: -30px; opacity: .24 }
+.rail__echo--3 { top: -42px; opacity: .11 }
+
+/* the packet also breathes, on its own clock */
+.rail__packet {
+  animation: railpk linear both, pkglow 1.7s ease-in-out infinite;
+  <b>animation-timeline</b>: scroll(root block), <b>auto</b>; }</pre>
+  </div>
+
+  <div class="row">
+    <div><span class="act">Principle</span><span class="name">Reading highlight</span></div>
+    <div class="what">Each word inks from muted to full as it crosses the reading line. <b>Used exactly once on the site.</b></div>
+    <div class="tl">view() per word<br><u>entry 100% &#8594; cover 55%</u></div>
+    <pre>.read w { animation: ink linear both;
+  <b>animation-timeline</b>: view();
+  <b>animation-range</b>: entry 15% cover 42% }
+@keyframes ink {
+  from { color: color-mix(in oklab,
+           var(--muted), transparent 55%) }
+  to   { color: var(--ink) } }</pre>
+  </div>
+
+  <div class="row">
+    <div><span class="act">Threshold</span><span class="name">Day &#8594; night inversion</span></div>
+    <div class="what">The signature moment. Two named timelines drive one registered property; every token is a <code>color-mix</code> of it.</div>
+    <div class="tl">view() &#215; 2, hoisted<br><u>cover 32% &#8594; cover 72%</u></div>
+    <pre>@property <b>--night</b> { syntax: "&lt;number&gt;";
+  inherits: true; initial-value: 0 }
+.thr--in { <b>view-timeline</b>: --t-in block }
+.thr--out{ <b>view-timeline</b>: --t-out block }
+.page {
+  <b>timeline-scope</b>: --t-in, --t-out;
+  --night: calc(var(--nin) - var(--nout));
+  --surface: color-mix(in oklab, #f7f8fc,
+    #0b0e16 calc(var(--night) * 100%));
+  animation: nin linear both, nout linear both;
+  animation-timeline: --t-in, --t-out;
+  animation-range: cover 32% cover 72%,
+                   cover 32% cover 72% }</pre>
+  </div>
+
+  <div class="row">
+    <div><span class="act">Threshold</span><span class="name">Scanline horizon</span></div>
+    <div class="what">A cobalt edge sweeps the viewport &#8212; you watch the inversion&#8217;s horizon cross the screen.</div>
+    <div class="tl">derived from --night<br><u>no timeline of its own</u></div>
+    <pre>.thr__scan {
+  border-top: 1px solid var(--cobalt);
+  <b>clip-path</b>: inset(calc(100% - var(--night)*100%) 0 0 0) }
+.thr--out .thr__scan {
+  <b>clip-path</b>: inset(0 0 calc(var(--night)*100%) 0) }</pre>
+  </div>
+
+  <div class="row">
+    <div><span class="act">Systems</span><span class="name">Event on a motion path</span></div>
+    <div class="what">The event itself travels the system map, scrubbed by the same scroll that reads the copy.</div>
+    <div class="tl">--case (named)<br><u>contain 0% &#8594; contain 92%</u></div>
+    <pre>.packet {
+  <b>offset-path</b>: path("M 44 40 L 44 300 L 210 300
+                    L 210 40 L 356 40");
+  animation: travel linear both;
+  animation-timeline: --case;
+  animation-range: contain 0% contain 92% }
+@keyframes travel {
+  from { <b>offset-distance</b>: 0% }
+  to   { <b>offset-distance</b>: 100% } }</pre>
+  </div>
+
+  <div class="row">
+    <div><span class="act">Systems</span><span class="name">Edge drawing</span></div>
+    <div class="what">Graph edges draw as the argument does. The panel is <code>position: sticky</code>, so its own <code>view()</code> freezes while pinned &#8212; the edges ride a named timeline on the article instead.</div>
+    <div class="tl">--case (named)<br><u>contain 0% &#8594; contain 62%</u></div>
+    <pre>/* the article owns the timeline */
+.case { <b>view-timeline</b>: --case block }
+
+/* descendants look the name up on their ancestors */
+.edge, .lit, .packet {
+  <b>animation-timeline</b>: --case;
+  animation-range: <b>contain</b> 0% contain 62% }
+@keyframes draw { to { <b>stroke-dashoffset</b>: 0 } }</pre>
+  </div>
+
+  <div class="row">
+    <div><span class="act">Writing</span><span class="name">Scroll-driven marquee</span></div>
+    <div class="what">The tag rule slides only while you scroll. Motion you cause, not motion that loops at you.</div>
+    <div class="tl">view()<br><u>cover 0% &#8594; cover 100%</u></div>
+    <pre>.wmarq b { animation: marq linear both;
+  animation-timeline: view();
+  animation-range: cover 0% cover 100% }
+@keyframes marq {
+  from { transform: translateX(4%) }
+  to   { transform: translateX(-46%) } }</pre>
+  </div>
+
+  <div class="row">
+    <div><span class="act">Research</span><span class="name">The campus lights up</span></div>
+    <div class="what">In night mode the photo starts dark and desaturated and gains light &#8212; the one warm moment inside the instrument.</div>
+    <div class="tl">view()<br><u>entry 5% &#8594; cover 55%</u></div>
+    <pre>@keyframes lightup {
+  from { <b>filter</b>: grayscale(1) brightness(.42) contrast(1.1);
+         transform: scale(1.12) }
+  to   { <b>filter</b>: none; transform: scale(1.02) } }
+/* frame reveal runs on its own range */
+@keyframes reveal {
+  from { clip-path: inset(18% 10% 18% 10%) }
+  to   { clip-path: inset(0) } }</pre>
+  </div>
+
+  <div class="row">
+    <div><span class="act">Research</span><span class="name">MAPE-K, driven not looping</span></div>
+    <div class="what">Today the loop spins on an 8s infinite keyframe. It becomes exactly one turn across the section &#8212; you drive it.</div>
+    <div class="tl">view()<br><u>cover 0% &#8594; cover 100%</u></div>
+    <pre>/* replaces @keyframes core-turn 8s linear infinite */
+.rloop { animation: loopturn linear both;
+  animation-timeline: view();
+  animation-range: cover 0% cover 100% }
+@keyframes loopturn {
+  from { transform: rotate(0deg) scale(.86) }
+  to   { transform: rotate(360deg) scale(1) } }</pre>
+  </div>
+
+  <div class="row">
+    <div><span class="act">Trajectory</span><span class="name">Trace waterfall</span></div>
+    <div class="what">Six spans on a true month axis (Jan 2021 &#8211; Mar 2027), nested where they nest. Two stay open because they are; a dashed tail marks the one projected end.</div>
+    <div class="tl">view() per row<br><u>entry 100% &#8594; cover 28%</u></div>
+    <pre>.wf__span {
+  left: var(--s); width: var(--w);
+  transform-origin: left;
+  animation: grow .95s var(--ease) both;
+  animation-timeline: view();
+  animation-range: entry 100% cover 28% }
+@keyframes grow {
+  from { <b>transform</b>: scaleX(0) } to { <b>transform</b>: scaleX(1) } }</pre>
+  </div>
+
+  <div class="row">
+    <div><span class="act">Contact</span><span class="name">Typographic bookend</span></div>
+    <div class="what">The closing headline arrives with the same weight scrub the hero left on. The page opens and closes on the same gesture.</div>
+    <div class="tl">view()<br><u>entry 0% &#8594; cover 40%</u></div>
+    <pre>@keyframes mass2 {
+  from { font-variation-settings: "wght" 250;
+         letter-spacing: -.09em; opacity: .3 }
+  to   { font-variation-settings: "wght" 620;
+         letter-spacing: -.07em; opacity: 1 } }</pre>
+  </div>
+
+  <div class="foot">
+    <div>
+      <h4>Rules that hold everywhere</h4>
+      <ul>
+        <li>Content is legible at rest. Motion is the <b>arrival</b>, never a gate on reading.</li>
+        <li>Author the <b>resting state as the CSS default</b>; animations only travel to it. A timeline that fails to resolve shows a finished page.</li>
+        <li>One easing across the site: <code>cubic-bezier(.16, 1, .3, 1)</code> &#8212; already the only curve in globals.css.</li>
+        <li>Scroll-driven animations use <code>linear</code> timing. Easing lives in the keyframe distribution, not the timing function.</li>
+        <li>No technique appears in two acts.</li>
+        <li><b>Nothing starts before the element is on screen.</b> Every reveal begins at <code>entry 100%</code> &#8212; the element fully inside the viewport &#8212; never at <code>entry 0&#8211;20%</code>, which fires while it is still a sliver at the bottom edge.</li>
+        <li>Anything inside a <code>position: sticky</code> container must ride a <b>named timeline</b> from a non-sticky ancestor. A sticky element's own <code>view()</code> stalls while it is pinned.</li>
+        <li>The rail is the <b>only</b> place with continuously-looping motion (glow, flow, echoes). It is a signal, not decoration &#8212; and it is the first thing reduced-motion removes.</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Support &amp; fallback</h4>
+      <ul>
+        <li>Wrap in <code>@supports (animation-timeline: view())</code>; without it the resting state simply shows, no JS shim needed.</li>
+        <li><code>timeline-scope</code> is the one newer piece &#8212; if absent, <code>--night</code> falls back to a per-section static value and the wipe is skipped.</li>
+        <li><code>offset-path</code> is broadly supported; the packet degrades to its end position.</li>
+        <li>Drop the <code>gsap.registerPlugin</code> import cost on routes that no longer need ScrollTrigger.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":1440,"height":1900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

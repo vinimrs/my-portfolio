@@ -1,0 +1,329 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700&family=Geist:wght@100..900&display=swap">
+  <style>
+    @property --nin  { syntax: "<number>"; inherits: true; initial-value: 0 }
+    @property --nout { syntax: "<number>"; inherits: true; initial-value: 0 }
+    @property --night{ syntax: "<number>"; inherits: true; initial-value: 0 }
+
+    body { margin: 0 }
+    a { color: inherit; text-decoration: none } a:hover { color: inherit }
+
+    .mb {
+      --d-surface:#f7f8fc; --n-surface:#0b0e16;
+      --d-ink:#111522;     --n-ink:#e8edfb;
+      --d-muted:#5d6578;   --n-muted:#8994ae;
+      --d-cobalt:#245bff;  --n-cobalt:#5b87ff;
+      --d-hair:#ccd4e8;    --n-hair:#1e2740;
+      --d-wash:#e9eeff;    --n-wash:#161d2e;
+
+      --night: calc(var(--nin) - var(--nout));
+      --surface: color-mix(in oklab, var(--d-surface), var(--n-surface) calc(var(--night)*100%));
+      --ink:     color-mix(in oklab, var(--d-ink),     var(--n-ink)     calc(var(--night)*100%));
+      --muted:   color-mix(in oklab, var(--d-muted),   var(--n-muted)   calc(var(--night)*100%));
+      --cobalt:  color-mix(in oklab, var(--d-cobalt),  var(--n-cobalt)  calc(var(--night)*100%));
+      --hair:    color-mix(in oklab, var(--d-hair),    var(--n-hair)    calc(var(--night)*100%));
+      --wash:    color-mix(in oklab, var(--d-wash),    var(--n-wash)    calc(var(--night)*100%));
+      --ease: cubic-bezier(.16,1,.3,1);
+      --px: 1.15rem;
+
+      background: var(--surface); color: var(--ink);
+      font-family: "Geist", system-ui, sans-serif; font-size: 16px; line-height: 1.6;
+      timeline-scope: --t-in, --t-out;
+      animation: nin linear both, nout linear both;
+      animation-timeline: --t-in, --t-out;
+      animation-range: cover 32% cover 72%, cover 32% cover 72%;
+    }
+    @keyframes nin  { from { --nin: 0 }  to { --nin: 1 } }
+    @keyframes nout { from { --nout: 0 } to { --nout: 1 } }
+
+    /* header: no fake status bar. the real one renders above this. */
+    .hdr {
+      position: sticky; top: 0; z-index: 20; height: 4.4rem;
+      display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+      padding-inline: var(--px); border-bottom: 1px solid var(--hair);
+      background: color-mix(in oklab, var(--surface), transparent 12%); backdrop-filter: blur(14px);
+    }
+    .brand { display: flex; align-items: center; gap: .18rem; font-size: 1.35rem; font-weight: 900; letter-spacing: -.085em }
+    .brand i { align-self: center; color: var(--cobalt); font-size: .45rem; font-style: normal; letter-spacing: 0; transform: translateY(-.6rem) }
+    .hdr-actions { display: flex; align-items: center; gap: .5rem }
+    /* 44px minimum hit targets */
+    .tap { min-height: 44px; min-width: 44px; display: inline-flex; align-items: center; justify-content: center; padding-inline: .55rem }
+    .loc { font-family: "Geist Mono", ui-monospace, monospace; font-size: .62rem; font-weight: 720; color: var(--muted); letter-spacing: .04em }
+    .loc b { color: var(--cobalt); font-weight: 720 }
+    .menu { flex-direction: column; gap: 4px }
+    .menu span { display: block; width: 18px; height: 1.5px; background: var(--ink) }
+
+    .rail { position: fixed; z-index: 30; inset: 0 auto 0 0; width: 2px; pointer-events: none }
+    .rail__track { position: absolute; inset: 0; background: color-mix(in oklab, var(--hair), transparent 45%) }
+    .rail__trail { position: absolute; inset: 0; transform-origin: top; transform: scaleY(0); overflow: hidden;
+      background: color-mix(in oklab, var(--cobalt), transparent 60%);
+      animation: fill linear both; animation-timeline: scroll(root block) }
+    @keyframes fill { to { transform: scaleY(1) } }
+    .rail__trail::after { content: ""; position: absolute; inset: -16px 0;
+      background: repeating-linear-gradient(to bottom, transparent 0 8px, color-mix(in oklab, var(--cobalt), transparent 55%) 8px 10px);
+      animation: railflow 1.15s linear infinite }
+    @keyframes railflow { to { transform: translateY(10px) } }
+    .rail__pk, .rail__echo { position: absolute; left: -1px; width: 4px;
+      animation: pk linear both; animation-timeline: scroll(root block) }
+    @keyframes pk { to { transform: translateY(calc(100vh - 20px)) } }
+    .rail__pk { height: 20px; background: var(--cobalt);
+      animation: pk linear both, pkglow 1.7s ease-in-out infinite;
+      animation-timeline: scroll(root block), auto }
+    @keyframes pkglow {
+      0%,100% { box-shadow: 0 0 8px 1px color-mix(in oklab, var(--cobalt), transparent 58%) }
+      50%     { box-shadow: 0 0 18px 4px color-mix(in oklab, var(--cobalt), transparent 28%) } }
+    .rail__echo { background: var(--cobalt) }
+    .rail__echo--1 { top: -12px; height: 13px; opacity: .48 }
+    .rail__echo--2 { top: -24px; height: 8px;  opacity: .22 }
+
+    section { padding: 3rem var(--px) }
+    .marker { font-family: "Geist Mono", ui-monospace, monospace; font-size: .6rem; font-weight: 640; letter-spacing: .07em; text-transform: uppercase; color: var(--cobalt) }
+
+    /* ---- hero ---- */
+    .hero { min-height: calc(100svh - 4.4rem); display: flex; flex-direction: column; justify-content: center; gap: 1.3rem; overflow: clip }
+    .hero-meta { font-family: "Geist Mono", ui-monospace, monospace; font-size: .58rem; letter-spacing: .05em; text-transform: uppercase; color: var(--muted) }
+    .hline { overflow: hidden }
+    .hword {
+      display: block; font-size: clamp(3.2rem, 15vw, 5rem); line-height: .82;
+      letter-spacing: -.06em; font-variation-settings: "wght" 760;
+      animation: win 1.2s var(--ease) both, wmass linear both;
+      animation-timeline: auto, view(); animation-range: normal, exit 0% exit 100%;
+    }
+    .hline:nth-of-type(2) .hword { animation-delay: .09s, 0s }
+    @keyframes win { from { transform: translateY(112%) } to { transform: none } }
+    @keyframes wmass { from { font-variation-settings: "wght" 760; opacity: 1 } to { font-variation-settings: "wght" 300; opacity: .4 } }
+    .hrole { font-family: "Geist Mono", ui-monospace, monospace; font-size: .66rem; font-weight: 650; letter-spacing: .04em; color: var(--muted) }
+    .hfocus { padding-top: .8rem; border-top: 1px solid var(--cobalt); font-family: "Geist Mono", ui-monospace, monospace; font-size: .58rem; font-weight: 650; letter-spacing: .045em; line-height: 1.7 }
+    .hero strong { display: block; font-size: 1.35rem; font-weight: 620; letter-spacing: -.03em; line-height: 1.15 }
+    .hero p { margin: 0; font-size: .92rem; color: var(--muted) }
+    .cta-line { display: inline-flex; align-items: center; min-height: 44px; font-size: .68rem; font-weight: 650; text-transform: uppercase; letter-spacing: .07em; color: var(--cobalt) }
+    .hstatus { display: flex; align-items: center; gap: .55rem; font-size: .62rem; color: var(--muted); line-height: 1.45 }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--cobalt); flex: none; animation: pulse 2.4s infinite }
+    @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(36,91,255,.25) } 55% { box-shadow: 0 0 0 7px rgba(36,91,255,0) } }
+
+    /* ---- threshold ---- */
+    .thr { position: relative; min-height: 82svh; display: grid; place-content: center; text-align: center; gap: .6rem; overflow: clip }
+    .thr--in  { view-timeline: --t-in block }
+    .thr--out { view-timeline: --t-out block }
+    .thr__scan { position: absolute; inset: 0; border-top: 1px solid var(--cobalt);
+      background: linear-gradient(to top, color-mix(in oklab, var(--cobalt), transparent 86%), transparent 45%);
+      clip-path: inset(calc(100% - var(--night)*100%) 0 0 0) }
+    .thr--out .thr__scan { clip-path: inset(0 0 calc(var(--night)*100%) 0); border-top: 0; border-bottom: 1px solid var(--cobalt) }
+    .thr__read { position: relative; font-family: "Geist Mono", ui-monospace, monospace; font-size: .58rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--cobalt) }
+    .thr__big { position: relative; font-size: 2.1rem; font-weight: 300; letter-spacing: -.05em; line-height: 1.05 }
+    .thr__hint { position: relative; font-size: .55rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted) }
+
+    /* ---- night sample ---- */
+    .night-sample { background: var(--surface) }
+    .night-sample h3 { margin: 1rem 0 1.4rem; font-size: 2rem; font-weight: 620; letter-spacing: -.05em; line-height: .92 }
+    .step { padding: 1.1rem 0; border-top: 1px solid var(--hair) }
+    .step span { font-family: "Geist Mono", ui-monospace, monospace; font-size: .57rem; letter-spacing: .07em; text-transform: uppercase; color: var(--cobalt) }
+    .step p { margin: .55rem 0 0; font-size: .95rem; line-height: 1.55; color: var(--ink);
+      animation: on linear both; animation-timeline: view(); animation-range: entry 100% cover 46% }
+    @keyframes on { from { opacity: .2; transform: translateY(14px) } to { opacity: 1; transform: none } }
+    .tags { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: 1.4rem }
+    .tags span { font-family: "Geist Mono", ui-monospace, monospace; font-size: .55rem; text-transform: uppercase; letter-spacing: .06em; padding: .4rem .6rem; border: 1px solid var(--hair); color: var(--muted) }
+
+    /* ---- trace waterfall, stacked for narrow ---- */
+    .path h2 { margin: 1rem 0 .8rem; font-size: 2.3rem; font-weight: 620; letter-spacing: -.055em; line-height: .9 }
+    .path > p { margin: 0 0 2rem; color: var(--muted); font-size: .92rem }
+    .wf { border-top: 1px solid var(--hair) }
+    .wf__ticks { position: relative; height: 1.1em; margin: .6rem 0; padding-bottom: .6rem; border-bottom: 1px solid var(--hair);
+      font-family: "Geist Mono", ui-monospace, monospace; font-size: .53rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted) }
+    .wf__ticks span { position: absolute; left: var(--x); transform: translateX(-50%) }
+    .wf__ticks span:first-child { transform: none }
+    .wf__ticks span.now { color: var(--cobalt) }
+    .wf__row { padding: .95rem 0; border-bottom: 1px solid var(--hair) }
+    .wf__top { display: flex; justify-content: space-between; align-items: baseline; gap: .8rem; margin-bottom: .5rem }
+    .wf__top b { font-size: .92rem; font-weight: 640; letter-spacing: -.02em }
+    .wf__top i { font-style: normal; font-family: "Geist Mono", ui-monospace, monospace; font-size: .55rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted) }
+    .wf__role { font-size: .72rem; color: var(--muted); margin: 0 0 .5rem }
+    .wf__lane { position: relative; height: 20px }
+    .wf__lane::before { content: ""; position: absolute; inset: 50% 0 auto; height: 1px; background: repeating-linear-gradient(to right, var(--hair) 0 3px, transparent 3px 8px) }
+    .wf__lane::after { content: ""; position: absolute; left: 90.5%; top: -.95rem; bottom: -.95rem; width: 1px;
+      background: repeating-linear-gradient(to bottom, var(--cobalt) 0 3px, transparent 3px 7px); opacity: .45 }
+    .wf__proj { position: absolute; top: 5px; bottom: 5px; left: var(--s); width: var(--w);
+      border: 1px dashed color-mix(in oklab, var(--cobalt), transparent 55%); border-left: 0 }
+    .wf__nest { display: inline-block; width: .7rem }
+    .wf__span { position: absolute; top: 2px; bottom: 2px; left: var(--s); width: var(--w);
+      background: color-mix(in oklab, var(--cobalt), transparent 78%); border-left: 2px solid var(--cobalt);
+      transform-origin: left; animation: grow .9s var(--ease) both; animation-timeline: view(); animation-range: entry 100% cover 32% }
+    @keyframes grow { from { transform: scaleX(0) } to { transform: scaleX(1) } }
+    .wf__span.open { background: linear-gradient(to right, color-mix(in oklab, var(--cobalt), transparent 70%), transparent) }
+    .wf__span.open::after { content: ""; position: absolute; right: 0; top: 0; bottom: 0; width: 2px; background: var(--cobalt); animation: blink 1.8s steps(2) infinite }
+    @keyframes blink { 50% { opacity: .25 } }
+    .wf__attrs { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .6rem }
+    .wf__attrs span {
+      display: inline-flex; align-items: baseline; gap: .4rem;
+      font-family: "Geist Mono", ui-monospace, monospace; font-size: .54rem; letter-spacing: .04em;
+      padding: .3rem .5rem; border: 1px solid var(--hair); color: var(--ink);
+    }
+    .wf__attrs b { color: var(--cobalt); font-weight: 500; text-transform: uppercase; letter-spacing: .06em; font-size: .5rem }
+    .metrics { margin-top: 1.2rem }
+    .metrics span {
+      display: inline-flex; align-items: baseline; gap: .5rem;
+      font-family: "Geist Mono", ui-monospace, monospace; font-size: .56rem; letter-spacing: .05em;
+      padding: .45rem .7rem; border-left: 2px solid var(--cobalt); background: var(--wash); color: var(--muted);
+    }
+    .metrics b { font-size: .9rem; letter-spacing: -.02em; color: var(--cobalt); font-weight: 600 }
+    .flag { display: inline-block; margin-top: 1.1rem; font-family: "Geist Mono", ui-monospace, monospace; font-size: .53rem; letter-spacing: .06em; text-transform: uppercase; color: var(--cobalt); border: 1px dashed var(--cobalt); padding: .3rem .5rem }
+
+    /* ---- contact ---- */
+    .contact h2 { margin: 1rem 0 1rem; font-size: 2.9rem; font-weight: 620; letter-spacing: -.07em; line-height: .85;
+      animation: mass2 linear both; animation-timeline: view(); animation-range: entry 60% cover 48% }
+    @keyframes mass2 { from { font-variation-settings: "wght" 250; opacity: .3 } to { font-variation-settings: "wght" 620; opacity: 1 } }
+    .contact p { margin: 0 0 1.6rem; color: var(--muted); font-size: .92rem }
+    .cta {
+      display: flex; justify-content: space-between; align-items: center; min-height: 52px;
+      border-block: 1px solid var(--cobalt); color: var(--cobalt);
+      font-size: 1.1rem; font-weight: 620; letter-spacing: -.02em;
+    }
+    .clinks { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: 1.6rem }
+    .clinks a { min-height: 44px; display: inline-flex; align-items: center; padding-inline: .7rem; margin-left: -.7rem;
+      font-family: "Geist Mono", ui-monospace, monospace; font-size: .58rem; letter-spacing: .07em; text-transform: uppercase; color: var(--muted) }
+
+    @media (prefers-reduced-motion: reduce) {
+      .mb, .mb * { animation: none !important }
+      .mb { --night: 0 } .zone { --night: 1 }
+      .thr__scan { clip-path: inset(0) }
+      .hword { font-variation-settings: "wght" 760; opacity: 1 }
+      .contact h2 { font-variation-settings: "wght" 620; opacity: 1 }
+      .rail__trail { transform: scaleY(1) }
+      .wf__span { transform: scaleX(1) }
+      .step p { opacity: 1; transform: none }
+    }
+  </style>
+</helmet>
+
+<div class="mb">
+  <div class="rail" aria-hidden="true">
+    <div class="rail__track"></div><div class="rail__trail"></div>
+    <div class="rail__echo rail__echo--2"></div><div class="rail__echo rail__echo--1"></div>
+    <div class="rail__pk"></div>
+  </div>
+
+  <header class="hdr">
+    <span class="brand">VR<i>&#174;</i></span>
+    <div class="hdr-actions">
+      <a class="tap loc" href="#"><b>EN</b>&#8202;/&#8202;PT</a>
+      <a class="tap menu" href="#" aria-label="Menu"><span></span><span></span><span></span></a>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-meta">Macei&#243;, Brazil &#183; 14:32 BRT</div>
+    <div>
+      <div class="hline"><span class="hword">Vin&#237;cius</span></div>
+      <div class="hline"><span class="hword">Romualdo</span></div>
+    </div>
+    <div class="hrole">SOFTWARE ENGINEER</div>
+    <div class="hfocus">FINTECH &#183; DISTRIBUTED SYSTEMS &#183; RELIABILITY &#183; ADAPTIVE SECURITY</div>
+    <strong>Systems, decisions, impact.</strong>
+    <p>I design the logic behind high-trust financial products&#8212;and turn distributed complexity into experiences people can rely on.</p>
+    <a class="cta-line" href="#">Follow the signal &#8595;&#xfe0e;</a>
+    <div class="hstatus"><span class="dot"></span><span>Building fintech at iFood &#183; Researching adaptive security at USP</span></div>
+  </section>
+
+  <section class="thr thr--in">
+    <div class="thr__scan"></div>
+    <div class="thr__read">DAY &#9472;&#9654; INSTRUMENT</div>
+    <div class="thr__big">Follow the signal.</div>
+    <div class="thr__hint">entering the systems</div>
+  </section>
+
+  <div class="zone">
+    <section class="night-sample">
+      <div class="marker">01 / Selected systems</div>
+      <h3>Pix keys, without the uncertainty.</h3>
+      <div class="step"><span>01 / Context</span><p>A payment key looks simple. Behind it live ownership, claims, asynchronous events and reconciliation across multiple boundaries.</p></div>
+      <div class="step"><span>02 / Decision</span><p>Model consistency as a visible journey&#8212;not as the illusion of one synchronous request.</p></div>
+      <div class="step"><span>03 / Architecture</span><p>Event-driven state transitions, idempotent consumers and reconciliation paths keep every participant aligned.</p></div>
+      <div class="tags"><span>Go</span><span>Kotlin</span><span>CQRS</span><span>PostgreSQL</span><span>SQS</span><span>Kubernetes</span></div>
+      <div class="metrics"><span><b>1 of 3</b> core platforms led end to end</span></div>
+    </section>
+  </div>
+
+  <section class="thr thr--out">
+    <div class="thr__scan"></div>
+    <div class="thr__read">INSTRUMENT &#9472;&#9654; DAY</div>
+    <div class="thr__big">Back to the person.</div>
+    <div class="thr__hint">leaving the systems</div>
+  </section>
+
+  <section class="path">
+    <div class="marker">03 / Trajectory</div>
+    <h2>Code, consequence and curiosity.</h2>
+    <p>Each chapter added a different kind of responsibility to the systems I build.</p>
+    <div class="wf">
+      <div class="wf__ticks">
+        <span style="--x:0%">2021</span><span style="--x:32.4%">2023</span><span style="--x:64.9%">2025</span>
+        <span class="now" style="--x:90.5%">now</span>
+      </div>
+      <div class="wf__row">
+        <div class="wf__top"><b>UFSCar</b><i>4 yr 4 mo</i></div>
+        <p class="wf__role">Computer Science &#183; Jan 2021&#8212;Apr 2025</p>
+        <div class="wf__lane"><div class="wf__span" style="--s:0%;--w:68.9%"></div></div>
+      </div>
+      <div class="wf__row">
+        <div class="wf__top"><b><span class="wf__nest"></span>UFSCar</b><i>1 yr 1 mo</i></div>
+        <p class="wf__role">Scientific Researcher &#183; Mar 2022&#8212;Mar 2023</p>
+        <div class="wf__lane"><div class="wf__span" style="--s:18.9%;--w:16.2%"></div></div>
+      </div>
+      <div class="wf__row">
+        <div class="wf__top"><b><span class="wf__nest"></span>FAPESP</b><i>1 yr 1 mo</i></div>
+        <p class="wf__role">Scientific Researcher &#183; Mar 2023&#8212;Mar 2024</p>
+        <div class="wf__lane"><div class="wf__span" style="--s:35.1%;--w:16.2%"></div></div>
+      </div>
+      <div class="wf__row">
+        <div class="wf__top"><b><span class="wf__nest"></span>iFood</b><i>9 mo</i></div>
+        <p class="wf__role">Software Engineer Intern &#183; Mar&#8212;Nov 2024</p>
+        <div class="wf__lane"><div class="wf__span" style="--s:51.4%;--w:10.8%"></div></div>
+      </div>
+      <div class="wf__row">
+        <div class="wf__top"><b><span class="wf__nest"></span>iFood</b><i>open &#183; 1 yr 10 mo</i></div>
+        <p class="wf__role">Software Engineer &#183; Nov 2024&#8212;present</p>
+        <div class="wf__lane"><div class="wf__span open" style="--s:62.2%;--w:28.4%"></div></div>
+        <div class="wf__attrs">
+          <span><b>team slo</b>45.0 &#8594; 61.1</span>
+          <span><b>infra cost</b>&#8722;81%</span>
+          <span><b>platforms</b>3</span>
+        </div>
+      </div>
+      <div class="wf__row">
+        <div class="wf__top"><b><span class="wf__nest"></span>USP</b><i>open &#183; 1 yr 5 mo</i></div>
+        <p class="wf__role">M.Sc. Computer Science &#183; Mar 2025&#8212;present</p>
+        <div class="wf__lane">
+          <div class="wf__proj" style="--s:90.5%;--w:9.5%"></div>
+          <div class="wf__span open" style="--s:67.6%;--w:23%"></div>
+        </div>
+      </div>
+    </div>
+    <span class="flag">dashed tail = projected to Mar 2027</span>
+  </section>
+
+  <section class="contact">
+    <div class="marker">04 / Next signal</div>
+    <h2>Let&#8217;s build what&#8217;s next.</h2>
+    <p>Have a difficult system, an international opportunity or an unusual idea? I would like to hear about it.</p>
+    <a class="cta" href="#"><span>Start a conversation</span><span>&#8599;&#xfe0e;</span></a>
+    <div class="clinks">
+      <a href="#">LinkedIn &#8599;&#xfe0e;</a><a href="#">GitHub &#8599;&#xfe0e;</a><a href="#">Medium &#8599;&#xfe0e;</a>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

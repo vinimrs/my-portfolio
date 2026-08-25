@@ -1,0 +1,191 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700&family=Geist:wght@100..900&display=swap">
+  <style>
+    body { margin: 0 }
+    a { color: inherit; text-decoration: none } a:hover { color: inherit }
+
+    .rm {
+      --surface: #f7f8fc; --pure: #fff; --ink: #111522; --muted: #5d6578;
+      --cobalt: #245bff; --hair: #ccd4e8; --wash: #e9eeff;
+      background: var(--surface); color: var(--ink);
+      font-family: "Geist", system-ui, sans-serif; font-size: 16px; line-height: 1.6;
+      padding: clamp(2rem, 5vw, 4.5rem);
+    }
+    .mono, code { font-family: "Geist Mono", ui-monospace, monospace }
+    .kicker { font-family: "Geist Mono", ui-monospace, monospace; font-size: .62rem; font-weight: 640; letter-spacing: .1em; text-transform: uppercase; color: var(--cobalt) }
+    h1 { margin: 1rem 0 0; font-size: clamp(2.2rem, 4.6vw, 3.8rem); font-weight: 620; letter-spacing: -.055em; line-height: .95; max-width: 20ch }
+    .sub { margin: 1.1rem 0 0; color: var(--muted); max-width: 46rem }
+
+    .alert {
+      margin: 2rem 0 3rem; border-left: 2px solid var(--cobalt); background: var(--wash);
+      padding: 1.1rem 1.3rem; font-size: .9rem; line-height: 1.65; max-width: 52rem;
+    }
+    .alert b { font-weight: 640 }
+
+    .rowhead, .row {
+      display: grid; grid-template-columns: 1.5fr 2fr 2fr; gap: 1.4rem;
+      padding: 1.15rem 0; border-bottom: 1px solid var(--hair); align-items: start;
+    }
+    .rowhead { border-bottom: 1px solid var(--ink); padding-bottom: .7rem; font-family: "Geist Mono", ui-monospace, monospace; font-size: .56rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted) }
+    .row .n { font-size: .95rem; font-weight: 640; letter-spacing: -.02em }
+    .row .n small { display: block; font-weight: 400; font-size: .68rem; color: var(--cobalt); font-family: "Geist Mono", ui-monospace, monospace; letter-spacing: .06em; text-transform: uppercase; margin-top: .25rem }
+    .row div p { margin: 0; font-size: .85rem; line-height: 1.6; color: var(--muted) }
+    .row .rest { color: var(--ink) }
+    .row .rest::before {
+      content: "resolves to"; display: block; font-family: "Geist Mono", ui-monospace, monospace;
+      font-size: .53rem; letter-spacing: .1em; text-transform: uppercase; color: var(--cobalt); margin-bottom: .3rem;
+    }
+
+    .demo { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 1.5rem; margin: 3rem 0 }
+    .pane { border: 1px solid var(--hair); background: var(--pure) }
+    .pane > b { display: block; padding: .55rem .8rem; border-bottom: 1px solid var(--hair); font-family: "Geist Mono", ui-monospace, monospace; font-size: .56rem; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); font-weight: 500 }
+    .pane.on > b { color: var(--cobalt) }
+    .pane .body { padding: 1.4rem; display: grid; gap: .5rem }
+    .lane { position: relative; height: 13px }
+    .lane::before { content: ""; position: absolute; inset: 50% 0 auto; height: 1px; background: repeating-linear-gradient(to right, var(--hair) 0 3px, transparent 3px 8px) }
+    .bar { position: absolute; top: 1px; bottom: 1px; left: var(--s); width: var(--w); background: color-mix(in oklab, var(--cobalt), transparent 78%); border-left: 2px solid var(--cobalt) }
+    .pane.mid .bar { width: calc(var(--w) * .45) }
+    .cap { margin: .9rem 0 0; font-size: .78rem; color: var(--muted); line-height: 1.55 }
+
+    pre { margin: 0; padding: 1rem 1.1rem; background: var(--pure); border: 1px solid var(--hair); font-family: "Geist Mono", ui-monospace, monospace; font-size: .64rem; line-height: 1.8; overflow-x: auto; white-space: pre }
+    pre b { color: var(--cobalt); font-weight: 500 }
+    h3 { margin: 3rem 0 1rem; font-size: 1.25rem; font-weight: 640; letter-spacing: -.03em }
+
+    @media (max-width: 1000px) {
+      .rowhead { display: none } .row { grid-template-columns: 1fr; gap: .6rem }
+      .demo { grid-template-columns: 1fr }
+    }
+  </style>
+</helmet>
+
+<div class="rm">
+  <div class="kicker">Motion system &#183; reduced motion</div>
+  <h1>Every animation has a resting state that is the whole design.</h1>
+  <p class="sub">The rule that makes this safe: the resting state is the CSS default and animations only travel <em>to</em> it. Turning motion off can never hide content, because nothing is hidden to begin with.</p>
+
+  <div class="alert">
+    <b>This closes a real gap.</b> There is currently no <code>@media (prefers-reduced-motion)</code> block anywhere in <code>app/globals.css</code>, and no <code>matchMedia</code> guard around the GSAP effect &#8212; while <code>PRODUCT.md</code> commits to WCAG 2.2 AA with &#8220;reduced-motion alternatives for animated interactions.&#8221; Today a visitor with the OS setting on still gets the full scrub.
+  </div>
+
+  <div class="rowhead"><span>technique</span><span>with motion</span><span>reduced</span></div>
+
+  <div class="row">
+    <div class="n">Day &#8594; night inversion<small>Threshold</small></div>
+    <div><p>Tokens interpolate across the threshold; a cobalt horizon sweeps the viewport.</p></div>
+    <div class="rest"><p>A hard per-section switch. <code>--night: 0</code> on the page, <code>--night: 1</code> on the night zone. No wipe, no interpolation &#8212; the sections are simply light or dark.</p></div>
+  </div>
+
+  <div class="row">
+    <div class="n">Trace waterfall<small>Trajectory</small></div>
+    <div><p>Each span grows from zero width as its row reaches reading position.</p></div>
+    <div class="rest"><p>All six spans render fully expanded at their true positions. This is the state the design is drawn in anyway.</p></div>
+  </div>
+
+  <div class="row">
+    <div class="n">Reading highlight<small>Principle</small></div>
+    <div><p>Words ink from muted to full as they cross the reading line.</p></div>
+    <div class="rest"><p>The paragraph renders entirely in <code>--ink</code>. Nothing is dimmed and nothing waits.</p></div>
+  </div>
+
+  <div class="row">
+    <div class="n">Variable-font mass<small>Hero, Contact</small></div>
+    <div><p>Weight and tracking scrub as the headline enters or leaves.</p></div>
+    <div class="rest"><p>Fixed at the settled values &#8212; <code>wght 760</code> in the hero, <code>wght 620</code> at contact.</p></div>
+  </div>
+
+  <div class="row">
+    <div class="n">Edge drawing &amp; motion path<small>Systems</small></div>
+    <div><p>Graph edges draw in reading order; the event travels the map.</p></div>
+    <div class="rest"><p><code>stroke-dashoffset: 0</code> and <code>offset-distance: 100%</code>. The complete map, the event at its destination.</p></div>
+  </div>
+
+  <div class="row">
+    <div class="n">Case-study step scrub<small>Systems</small></div>
+    <div><p>Steps dim and lift, advancing with scroll; the section pins.</p></div>
+    <div class="rest"><p>No pinning. All four steps at full opacity, read as an ordinary vertical column.</p></div>
+  </div>
+
+  <div class="row">
+    <div class="n">Rail signal<small>Global</small></div>
+    <div><p>A packet travels the rail with three decaying echoes behind it, and data flows through the part already travelled.</p></div>
+    <div class="rest"><p>A static filled rail. Echoes, glow and the flowing texture are removed outright &#8212; they are the only continuously-looping motion on the page.</p></div>
+  </div>
+
+  <div class="row">
+    <div class="n">MAPE-K loop<small>Research</small></div>
+    <div><p>One full turn driven across the section.</p></div>
+    <div class="rest"><p>Static at 0&#176;, quadrants labelled. Note this also fixes today&#8217;s <code>core-turn</code>, an 8s infinite spin that never stops for anyone.</p></div>
+  </div>
+
+  <h3>Side by side</h3>
+  <div class="demo">
+    <div class="pane on mid">
+      <b>motion &#183; mid-scroll</b>
+      <div class="body">
+        <div class="lane"><div class="bar" style="--s:0%;--w:68.9%"></div></div>
+        <div class="lane"><div class="bar" style="--s:18.9%;--w:16.2%"></div></div>
+        <div class="lane"><div class="bar" style="--s:35.1%;--w:16.2%"></div></div>
+        <div class="lane"><div class="bar" style="--s:51.4%;--w:10.8%"></div></div>
+        <div class="lane"><div class="bar" style="--s:62.2%;--w:28.4%"></div></div>
+        <div class="lane"><div class="bar" style="--s:67.6%;--w:23%"></div></div>
+        <p class="cap">Spans caught partway. Meaningful only because they are heading somewhere.</p>
+      </div>
+    </div>
+    <div class="pane">
+      <b>prefers-reduced-motion: reduce</b>
+      <div class="body">
+        <div class="lane"><div class="bar" style="--s:0%;--w:68.9%"></div></div>
+        <div class="lane"><div class="bar" style="--s:18.9%;--w:16.2%"></div></div>
+        <div class="lane"><div class="bar" style="--s:35.1%;--w:16.2%"></div></div>
+        <div class="lane"><div class="bar" style="--s:51.4%;--w:10.8%"></div></div>
+        <div class="lane"><div class="bar" style="--s:62.2%;--w:28.4%"></div></div>
+        <div class="lane"><div class="bar" style="--s:67.6%;--w:23%"></div></div>
+        <p class="cap">The finished figure, immediately. No information is lost &#8212; only the arrival.</p>
+      </div>
+    </div>
+  </div>
+
+  <h3>The implementation</h3>
+  <pre>@media (prefers-reduced-motion: reduce) {
+  <b>*</b> { animation: none !important; transition: none !important; }
+
+  /* the inversion becomes a per-section switch */
+  .page       { --night: 0 }
+  .zone-night { --night: 1 }
+  .thr__scan  { clip-path: inset(0) }
+
+  /* everything else pinned to its settled value */
+  .hero-word  { font-variation-settings: "wght" 760 }
+  .contact h2 { font-variation-settings: "wght" 620 }
+  .rail__trail{ transform: scaleY(1) }
+  .wf__span   { transform: scaleX(1) }
+  .edge, .draw{ stroke-dashoffset: 0 }
+  .packet     { offset-distance: 100% }
+  .read w     { color: var(--ink) }
+}</pre>
+
+  <h3>And the JS side &#8212; currently missing entirely</h3>
+  <pre>// app/home-client.tsx &#8212; guard the GSAP effect
+const <b>reduce</b> = window.matchMedia("(prefers-reduced-motion: reduce)");
+if (<b>reduce.matches</b>) return;          // skip ScrollTrigger setup wholesale
+
+// or, to keep triggers but drop the movement:
+ScrollTrigger.config({ ignoreMobileResize: true });
+gsap.defaults({ duration: <b>reduce.matches ? 0 : 0.9</b> });</pre>
+</div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":1360,"height":1720}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

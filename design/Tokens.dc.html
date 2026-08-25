@@ -1,0 +1,172 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700&family=Geist:wght@100..900&display=swap">
+  <style>
+    body { margin: 0 }
+    a { color: inherit; text-decoration: none } a:hover { color: inherit }
+
+    .tk {
+      --surface: #f7f8fc; --pure: #fff; --ink: #111522; --muted: #5d6578;
+      --cobalt: #245bff; --hair: #ccd4e8; --wash: #e9eeff;
+      background: var(--surface); color: var(--ink);
+      font-family: "Geist", system-ui, sans-serif; font-size: 16px; line-height: 1.6;
+      padding: clamp(2rem, 5vw, 4.5rem);
+    }
+    .mono, code { font-family: "Geist Mono", ui-monospace, monospace }
+    .kicker { font-family: "Geist Mono", ui-monospace, monospace; font-size: .62rem; font-weight: 640; letter-spacing: .1em; text-transform: uppercase; color: var(--cobalt) }
+    h1 { margin: 1rem 0 0; font-size: clamp(2.2rem, 4.6vw, 3.8rem); font-weight: 620; letter-spacing: -.055em; line-height: .95; max-width: 18ch }
+    .sub { margin: 1.1rem 0 3rem; color: var(--muted); max-width: 46rem }
+    h3 { margin: 3rem 0 1.2rem; font-size: 1.25rem; font-weight: 640; letter-spacing: -.03em }
+    h3:first-of-type { margin-top: 0 }
+
+    table { width: 100%; border-collapse: collapse; font-size: .82rem }
+    th {
+      text-align: left; padding: .55rem .8rem .55rem 0; border-bottom: 1px solid var(--ink);
+      font-family: "Geist Mono", ui-monospace, monospace; font-size: .55rem;
+      letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 500;
+    }
+    td { padding: .7rem .8rem .7rem 0; border-bottom: 1px solid var(--hair); vertical-align: middle }
+    td.tok { font-family: "Geist Mono", ui-monospace, monospace; font-size: .72rem; color: var(--ink) }
+    td.val { font-family: "Geist Mono", ui-monospace, monospace; font-size: .72rem; color: var(--muted) }
+    .sw { display: inline-block; width: 2.6rem; height: 1.3rem; border: 1px solid var(--hair); vertical-align: middle; margin-right: .6rem }
+    .ratio { font-family: "Geist Mono", ui-monospace, monospace; font-size: .68rem; color: var(--muted) }
+    .ratio b { color: var(--cobalt); font-weight: 500 }
+    .pass { color: var(--cobalt) }
+
+    .note { margin: 1rem 0 0; font-size: .82rem; color: var(--muted); max-width: 50rem; line-height: 1.65 }
+    .note code { background: var(--wash); padding: .08rem .3rem; font-size: .74rem }
+
+    .split { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 2.5rem }
+    .darkbox { background: #0b0e16; border: 1px solid #1e2740; padding: 1.4rem }
+    .darkbox td { border-bottom-color: #1e2740; color: #e8edfb }
+    .darkbox th { border-bottom-color: #e8edfb; color: #8994ae }
+    .darkbox td.val { color: #8994ae }
+    .darkbox .sw { border-color: #1e2740 }
+    .darkbox h4, .lightbox h4 { margin: 0 0 1rem; font-family: "Geist Mono", ui-monospace, monospace; font-size: .58rem; letter-spacing: .1em; text-transform: uppercase }
+    .darkbox h4 { color: #5b87ff } .lightbox h4 { color: var(--cobalt) }
+    .lightbox { background: var(--pure); border: 1px solid var(--hair); padding: 1.4rem }
+
+    pre { margin: 1rem 0 0; padding: 1rem 1.1rem; background: var(--pure); border: 1px solid var(--hair); font-family: "Geist Mono", ui-monospace, monospace; font-size: .64rem; line-height: 1.8; overflow-x: auto; white-space: pre }
+    pre b { color: var(--cobalt); font-weight: 500 }
+
+    .scale td:last-child { font-family: "Geist", system-ui, sans-serif; color: var(--ink) }
+    .s1 { font-size: 2.4rem; font-weight: 620; letter-spacing: -.065em; line-height: .8 }
+    .s2 { font-size: 1.7rem; font-weight: 620; letter-spacing: -.06em; line-height: .9 }
+    .s3 { font-size: 1.15rem; font-weight: 620; letter-spacing: -.055em }
+    .s4 { font-size: .95rem; letter-spacing: -.015em }
+    .s5 { font-family: "Geist Mono", ui-monospace, monospace; font-size: .63rem; letter-spacing: .06em; text-transform: uppercase }
+
+    @media (max-width: 1000px) { .split { grid-template-columns: 1fr } }
+  </style>
+</helmet>
+
+<div class="tk">
+  <div class="kicker">Motion system &#183; tokens</div>
+  <h1>Day and night are one palette with a single control.</h1>
+  <p class="sub">Day values are lifted verbatim from <code class="mono">app/globals.css</code> &#8212; nothing was re-picked. Night is derived in oklab from the same hues, raised only as far as contrast requires.</p>
+
+  <h3>The two palettes</h3>
+  <div class="split">
+    <div class="lightbox">
+      <h4>Day &#183; --night: 0</h4>
+      <table>
+        <tr><td class="tok">--surface</td><td><span class="sw" style="background:#f7f8fc"></span></td><td class="val">#f7f8fc</td></tr>
+        <tr><td class="tok">--surface-pure</td><td><span class="sw" style="background:#ffffff"></span></td><td class="val">#ffffff</td></tr>
+        <tr><td class="tok">--ink</td><td><span class="sw" style="background:#111522"></span></td><td class="val">#111522</td></tr>
+        <tr><td class="tok">--muted</td><td><span class="sw" style="background:#5d6578"></span></td><td class="val">#5d6578</td></tr>
+        <tr><td class="tok">--cobalt</td><td><span class="sw" style="background:#245bff"></span></td><td class="val">#245bff</td></tr>
+        <tr><td class="tok">--blue-wash</td><td><span class="sw" style="background:#e9eeff"></span></td><td class="val">#e9eeff</td></tr>
+        <tr><td class="tok">--hairline</td><td><span class="sw" style="background:#ccd4e8"></span></td><td class="val">#ccd4e8</td></tr>
+      </table>
+    </div>
+    <div class="darkbox">
+      <h4>Night &#183; --night: 1</h4>
+      <table>
+        <tr><td class="tok">--surface</td><td><span class="sw" style="background:#0b0e16"></span></td><td class="val">#0b0e16</td></tr>
+        <tr><td class="tok">--surface-pure</td><td><span class="sw" style="background:#121826"></span></td><td class="val">#121826</td></tr>
+        <tr><td class="tok">--ink</td><td><span class="sw" style="background:#e8edfb"></span></td><td class="val">#e8edfb</td></tr>
+        <tr><td class="tok">--muted</td><td><span class="sw" style="background:#8994ae"></span></td><td class="val">#8994ae</td></tr>
+        <tr><td class="tok">--cobalt</td><td><span class="sw" style="background:#5b87ff"></span></td><td class="val">#5b87ff</td></tr>
+        <tr><td class="tok">--blue-wash</td><td><span class="sw" style="background:#161d2e"></span></td><td class="val">#161d2e</td></tr>
+        <tr><td class="tok">--hairline</td><td><span class="sw" style="background:#1e2740"></span></td><td class="val">#1e2740</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <h3>Contrast</h3>
+  <table>
+    <tr><th>pair</th><th>mode</th><th>ratio</th><th>WCAG 2.2</th></tr>
+    <tr><td class="tok">--ink on --surface</td><td class="val">day</td><td class="ratio"><b>17.1 : 1</b></td><td class="pass">AAA</td></tr>
+    <tr><td class="tok">--muted on --surface</td><td class="val">day</td><td class="ratio"><b>5.5 : 1</b></td><td class="pass">AA</td></tr>
+    <tr><td class="tok">--cobalt on --surface</td><td class="val">day</td><td class="ratio"><b>4.9 : 1</b></td><td class="pass">AA</td></tr>
+    <tr><td class="tok">--ink on --surface</td><td class="val">night</td><td class="ratio"><b>16.5 : 1</b></td><td class="pass">AAA</td></tr>
+    <tr><td class="tok">--muted on --surface</td><td class="val">night</td><td class="ratio"><b>6.4 : 1</b></td><td class="pass">AA</td></tr>
+    <tr><td class="tok">--cobalt on --surface</td><td class="val">night</td><td class="ratio"><b>5.9 : 1</b></td><td class="pass">AA</td></tr>
+  </table>
+  <p class="note">Day cobalt at <code>#245bff</code> would land near <b>1.9 : 1</b> on the night surface &#8212; unreadable. Night cobalt is raised to <code>#5b87ff</code> for that reason alone; the hue is unchanged. <b>No text ever renders inside the transition band</b>, so the mid-interpolation greys are never a contrast surface.</p>
+
+  <h3>The interpolation</h3>
+  <pre>@property <b>--night</b> { syntax: "&lt;number&gt;"; inherits: true; initial-value: 0 }
+
+:root {
+  --d-surface: #f7f8fc;  --n-surface: #0b0e16;
+  --d-ink:     #111522;  --n-ink:     #e8edfb;
+  --d-cobalt:  #245bff;  --n-cobalt:  #5b87ff;
+
+  --surface: <b>color-mix</b>(in oklab, var(--d-surface),
+              var(--n-surface) calc(var(--night) * 100%));
+  --ink:     <b>color-mix</b>(in oklab, var(--d-ink),
+              var(--n-ink)     calc(var(--night) * 100%));
+  --cobalt:  <b>color-mix</b>(in oklab, var(--d-cobalt),
+              var(--n-cobalt)  calc(var(--night) * 100%));
+}</pre>
+  <p class="note">Registering <code>--night</code> as a <code>&lt;number&gt;</code> is what makes it animatable at all &#8212; an unregistered custom property jumps between values instead of interpolating. <code>oklab</code> keeps the midpoint from going muddy the way sRGB mixing does.</p>
+
+  <h3>Motion constants</h3>
+  <table>
+    <tr><th>token</th><th>value</th><th>used for</th></tr>
+    <tr><td class="tok">--ease-out</td><td class="val">cubic-bezier(.16, 1, .3, 1)</td><td>every time-based transition. Already the only curve in globals.css &#8212; unchanged.</td></tr>
+    <tr><td class="tok">timing (scroll-driven)</td><td class="val">linear</td><td>all <code>view()</code> / <code>scroll()</code> animations. Easing belongs to the keyframe spacing, not the function.</td></tr>
+    <tr><td class="tok">reveal range</td><td class="val">entry 100% &#8594; cover 45%</td><td>the default arrival for text blocks and rows. <b>entry 100%</b> means the element is fully on screen before anything moves.</td></tr>
+    <tr><td class="tok">sticky content range</td><td class="val">contain 0% &#8594; contain 62%</td><td>on a named timeline from a non-sticky ancestor &#8212; a sticky element's own <code>view()</code> freezes while pinned.</td></tr>
+    <tr><td class="tok">departure range</td><td class="val">exit 0% &#8594; exit 100%</td><td>hero mass, anything that leaves rather than arrives.</td></tr>
+    <tr><td class="tok">threshold range</td><td class="val">cover 32% &#8594; cover 72%</td><td>the inversion. Deliberately inset so it completes while the band fills the viewport.</td></tr>
+    <tr><td class="tok">hover / underline</td><td class="val">.42s</td><td>nav underline sweep, CTA inversion. Unchanged from today.</td></tr>
+  </table>
+
+  <h3>Type scale</h3>
+  <p class="note">Unchanged from <code>app/globals.css</code>. Listed here because the night mode must not tempt anyone to re-pick sizes &#8212; the non-round weights (540 / 620 / 640 / 650 / 680 / 720 / 760 / 900) are part of the identity.</p>
+  <table class="scale">
+    <tr><th>role</th><th>size</th><th>weight &#183; tracking</th><th>sample</th></tr>
+    <tr><td class="tok">hero-word</td><td class="val">clamp(5rem, 10.3vw, 11.7rem)</td><td class="val">760 &#183; -.065em</td><td class="s1">Vin&#237;cius</td></tr>
+    <tr><td class="tok">section h2</td><td class="val">clamp(3.8rem, 7.3vw, 7.5rem)</td><td class="val">620 &#183; -.06em</td><td class="s2">Reliability</td></tr>
+    <tr><td class="tok">case h3</td><td class="val">clamp(3.1rem, 5.2vw, 5.8rem)</td><td class="val">620 &#183; -.055em</td><td class="s3">Pix keys</td></tr>
+    <tr><td class="tok">body / step</td><td class="val">clamp(1.02rem, 1.35vw, 1.28rem)</td><td class="val">400 &#183; -.012em</td><td class="s4">Model consistency as a visible journey</td></tr>
+    <tr><td class="tok">chapter-marker</td><td class="val">.63rem mono</td><td class="val">640 &#183; .06em</td><td class="s5">01 / Selected systems</td></tr>
+  </table>
+
+  <h3>Layout constants</h3>
+  <table>
+    <tr><th>token</th><th>value</th></tr>
+    <tr><td class="tok">--page-x</td><td class="val">clamp(1.25rem, 3.6vw, 4.5rem)</td></tr>
+    <tr><td class="tok">--rail</td><td class="val">clamp(4.8rem, 7vw, 8rem)</td></tr>
+    <tr><td class="tok">--header-h</td><td class="val">5rem</td></tr>
+    <tr><td class="tok">grid</td><td class="val">repeat(12, minmax(0, 1fr)) &#183; gap clamp(1rem, 1.8vw, 2rem)</td></tr>
+    <tr><td class="tok">radius</td><td class="val">none. The design is orthogonal &#8212; there is no --radius token and there should not be one.</td></tr>
+  </table>
+</div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":1360,"height":2000}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
