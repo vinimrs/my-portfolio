@@ -1,0 +1,175 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700&family=Geist:wght@100..900&display=swap">
+  <style>
+    body { margin: 0 }
+    a { color: inherit; text-decoration: none } a:hover { color: inherit }
+
+    .kf {
+      --surface: #f7f8fc; --pure: #fff; --ink: #111522; --muted: #5d6578;
+      --cobalt: #245bff; --hair: #ccd4e8; --wash: #e9eeff;
+      background: var(--surface); color: var(--ink);
+      font-family: "Geist", system-ui, sans-serif; font-size: 16px; line-height: 1.6;
+      padding: clamp(2rem, 5vw, 4.5rem);
+    }
+    .mono { font-family: "Geist Mono", ui-monospace, monospace }
+    .kicker { font-family: "Geist Mono", ui-monospace, monospace; font-size: .62rem; font-weight: 640; letter-spacing: .1em; text-transform: uppercase; color: var(--cobalt) }
+    h1 { margin: 1rem 0 0; font-size: clamp(2.2rem, 4.6vw, 3.8rem); font-weight: 620; letter-spacing: -.055em; line-height: .95; max-width: 18ch }
+    .sub { margin: 1.1rem 0 3rem; color: var(--muted); max-width: 44rem }
+
+    .strip { margin-bottom: 3.4rem; border-top: 1px solid var(--ink); padding-top: 1.2rem }
+    .strip > header { display: flex; justify-content: space-between; align-items: baseline; gap: 1.5rem; margin-bottom: 1.1rem; flex-wrap: wrap }
+    .strip h2 { margin: 0; font-size: 1.35rem; font-weight: 640; letter-spacing: -.03em }
+    .strip .range { font-family: "Geist Mono", ui-monospace, monospace; font-size: .6rem; letter-spacing: .07em; text-transform: uppercase; color: var(--cobalt) }
+    .strip > p { margin: 0 0 1.3rem; color: var(--muted); font-size: .88rem; max-width: 46rem }
+
+    .frames { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .9rem }
+    .frame { border: 1px solid var(--hair) }
+    .frame > b {
+      display: block; padding: .45rem .6rem; border-bottom: 1px solid var(--hair);
+      font-family: "Geist Mono", ui-monospace, monospace; font-size: .55rem;
+      letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 500;
+    }
+    .frame:first-child > b, .frame:last-child > b { color: var(--cobalt) }
+    .stage { height: 11rem; position: relative; overflow: hidden; display: grid; place-content: center; padding: .8rem; text-align: center }
+
+    /* ---- strip 1: the inversion ---- */
+    .inv {
+      --n: var(--p);
+      background: color-mix(in oklab, #f7f8fc, #0b0e16 calc(var(--n) * 100%));
+      color: color-mix(in oklab, #111522, #e8edfb calc(var(--n) * 100%));
+    }
+    .inv::before {
+      content: ""; position: absolute; inset: 0;
+      background: linear-gradient(to top, color-mix(in oklab, #245bff, transparent 84%), transparent 45%);
+      clip-path: inset(calc(100% - var(--n) * 100%) 0 0 0);
+      border-top: 1px solid color-mix(in oklab, #245bff, #5b87ff calc(var(--n) * 100%));
+    }
+    .inv span { position: relative; font-family: "Geist Mono", ui-monospace, monospace; font-size: .5rem; letter-spacing: .14em; text-transform: uppercase; opacity: .7 }
+    .inv strong { position: relative; display: block; margin-top: .4rem; font-size: 1.05rem; font-weight: 300; letter-spacing: -.04em }
+
+    /* ---- strip 2: the waterfall ---- */
+    .wfk { background: var(--pure); align-content: center; gap: .3rem; padding: 1rem .8rem }
+    .wfk .lane { position: relative; height: 8px }
+    .wfk .lane::before { content: ""; position: absolute; inset: 50% 0 auto; height: 1px; background: repeating-linear-gradient(to right, var(--hair) 0 3px, transparent 3px 8px) }
+    .wfk .bar {
+      position: absolute; top: 1px; bottom: 1px; left: var(--s);
+      width: calc(var(--w) * var(--p)); min-width: 2px;
+      background: color-mix(in oklab, var(--cobalt), transparent 78%); border-left: 2px solid var(--cobalt);
+    }
+    .wfk .bar.o { background: linear-gradient(to right, color-mix(in oklab, var(--cobalt), transparent 70%), transparent) }
+
+    /* ---- strip 3: hero mass ---- */
+    .mass { background: var(--pure) }
+    .mass b {
+      display: block; font-size: 1.9rem; line-height: .9; font-weight: 400;
+      font-variation-settings: "wght" calc(760 - var(--p) * 460);
+      letter-spacing: calc(-.065em - var(--p) * .02em);
+      opacity: calc(1 - var(--p) * .65);
+    }
+    .mass i { display: block; font-style: normal; margin-top: .6rem; font-family: "Geist Mono", ui-monospace, monospace; font-size: .5rem; letter-spacing: .1em; color: var(--muted) }
+
+    .legendrow { display: flex; gap: 1.6rem; flex-wrap: wrap; margin-top: 1rem; font-family: "Geist Mono", ui-monospace, monospace; font-size: .56rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted) }
+
+    @media (max-width: 1000px) { .frames { grid-template-columns: repeat(2, minmax(0,1fr)) } }
+  </style>
+</helmet>
+
+<div class="kf">
+  <div class="kicker">Motion system &#183; keyframe strips</div>
+  <h1>The three signature moments, frozen at five points.</h1>
+  <p class="sub">Each strip samples the animation at scroll progress 0, .25, .50, .75 and 1 &#8212; the way you would spec motion for a build. Frames are static renders of the same CSS the live artboards run.</p>
+
+  <section class="strip">
+    <header>
+      <h2>1 &#183; The inversion</h2>
+      <span class="range">--night 0 &#8594; 1 &#183; cover 32% &#8594; cover 72%</span>
+    </header>
+    <p>The transition band contains no reading copy, so contrast never dips through the middle. The cobalt horizon is the event you remember.</p>
+    <div class="frames">
+      <div class="frame"><b>p = 0</b><div class="stage inv" style="--p:0"><span>mode</span><strong>day</strong></div></div>
+      <div class="frame"><b>p = .25</b><div class="stage inv" style="--p:.25"><span>mode</span><strong>day &#9654;</strong></div></div>
+      <div class="frame"><b>p = .50</b><div class="stage inv" style="--p:.5"><span>mode</span><strong>&#9654;&#9654;</strong></div></div>
+      <div class="frame"><b>p = .75</b><div class="stage inv" style="--p:.75"><span>mode</span><strong>&#9654; instrument</strong></div></div>
+      <div class="frame"><b>p = 1</b><div class="stage inv" style="--p:1"><span>mode</span><strong>instrument</strong></div></div>
+    </div>
+    <div class="legendrow"><span>surface #f7f8fc &#8594; #0b0e16</span><span>ink #111522 &#8594; #e8edfb</span><span>cobalt #245bff &#8594; #5b87ff</span></div>
+  </section>
+
+  <section class="strip">
+    <header>
+      <h2>2 &#183; The trace waterfall</h2>
+      <span class="range">scaleX 0 &#8594; 1 &#183; entry 5% &#8594; cover 26%, per row</span>
+    </header>
+    <p>Rows land in sequence as each reaches reading position, so the axis fills left to right while you descend. The two open spans keep their right edge live.</p>
+    <div class="frames">
+      <div class="frame"><b>p = 0</b><div class="stage wfk" style="--p:0">
+        <div class="lane"><div class="bar" style="--s:0%;--w:68.9%"></div></div>
+        <div class="lane"><div class="bar" style="--s:18.9%;--w:16.2%"></div></div>
+        <div class="lane"><div class="bar" style="--s:35.1%;--w:16.2%"></div></div>
+        <div class="lane"><div class="bar" style="--s:51.4%;--w:10.8%"></div></div>
+        <div class="lane"><div class="bar o" style="--s:62.2%;--w:28.4%"></div></div>
+        <div class="lane"><div class="bar o" style="--s:67.6%;--w:23%"></div></div></div></div>
+      <div class="frame"><b>p = .25</b><div class="stage wfk" style="--p:.25">
+        <div class="lane"><div class="bar" style="--s:0%;--w:68.9%"></div></div>
+        <div class="lane"><div class="bar" style="--s:18.9%;--w:16.2%"></div></div>
+        <div class="lane"><div class="bar" style="--s:35.1%;--w:16.2%"></div></div>
+        <div class="lane"><div class="bar" style="--s:51.4%;--w:10.8%"></div></div>
+        <div class="lane"><div class="bar o" style="--s:62.2%;--w:28.4%"></div></div>
+        <div class="lane"><div class="bar o" style="--s:67.6%;--w:23%"></div></div></div></div>
+      <div class="frame"><b>p = .50</b><div class="stage wfk" style="--p:.5">
+        <div class="lane"><div class="bar" style="--s:0%;--w:68.9%"></div></div>
+        <div class="lane"><div class="bar" style="--s:18.9%;--w:16.2%"></div></div>
+        <div class="lane"><div class="bar" style="--s:35.1%;--w:16.2%"></div></div>
+        <div class="lane"><div class="bar" style="--s:51.4%;--w:10.8%"></div></div>
+        <div class="lane"><div class="bar o" style="--s:62.2%;--w:28.4%"></div></div>
+        <div class="lane"><div class="bar o" style="--s:67.6%;--w:23%"></div></div></div></div>
+      <div class="frame"><b>p = .75</b><div class="stage wfk" style="--p:.75">
+        <div class="lane"><div class="bar" style="--s:0%;--w:68.9%"></div></div>
+        <div class="lane"><div class="bar" style="--s:18.9%;--w:16.2%"></div></div>
+        <div class="lane"><div class="bar" style="--s:35.1%;--w:16.2%"></div></div>
+        <div class="lane"><div class="bar" style="--s:51.4%;--w:10.8%"></div></div>
+        <div class="lane"><div class="bar o" style="--s:62.2%;--w:28.4%"></div></div>
+        <div class="lane"><div class="bar o" style="--s:67.6%;--w:23%"></div></div></div></div>
+      <div class="frame"><b>p = 1</b><div class="stage wfk" style="--p:1">
+        <div class="lane"><div class="bar" style="--s:0%;--w:68.9%"></div></div>
+        <div class="lane"><div class="bar" style="--s:18.9%;--w:16.2%"></div></div>
+        <div class="lane"><div class="bar" style="--s:35.1%;--w:16.2%"></div></div>
+        <div class="lane"><div class="bar" style="--s:51.4%;--w:10.8%"></div></div>
+        <div class="lane"><div class="bar o" style="--s:62.2%;--w:28.4%"></div></div>
+        <div class="lane"><div class="bar o" style="--s:67.6%;--w:23%"></div></div></div></div>
+    </div>
+    <div class="legendrow"><span>six spans, Jan 2021 &#8594; Mar 2027</span><span>transform-origin: left</span><span>open spans keep a live right edge</span></div>
+  </section>
+
+  <section class="strip">
+    <header>
+      <h2>3 &#183; Hero mass, on departure</h2>
+      <span class="range">wght 760 &#8594; 300 &#183; exit 0% &#8594; exit 100%</span>
+    </header>
+    <p>Geist is a variable font, so the name can genuinely thin out rather than fade. The contact headline runs this in reverse as the closing bookend.</p>
+    <div class="frames">
+      <div class="frame"><b>p = 0</b><div class="stage mass" style="--p:0"><b>Vin&#237;cius</b><i>wght 760</i></div></div>
+      <div class="frame"><b>p = .25</b><div class="stage mass" style="--p:.25"><b>Vin&#237;cius</b><i>wght 645</i></div></div>
+      <div class="frame"><b>p = .50</b><div class="stage mass" style="--p:.5"><b>Vin&#237;cius</b><i>wght 530</i></div></div>
+      <div class="frame"><b>p = .75</b><div class="stage mass" style="--p:.75"><b>Vin&#237;cius</b><i>wght 415</i></div></div>
+      <div class="frame"><b>p = 1</b><div class="stage mass" style="--p:1"><b>Vin&#237;cius</b><i>wght 300</i></div></div>
+    </div>
+    <div class="legendrow"><span>letter-spacing -.065em &#8594; -.085em</span><span>opacity 1 &#8594; .35</span><span>entry is a time-based reveal, not scroll</span></div>
+  </section>
+</div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":1440,"height":1500}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

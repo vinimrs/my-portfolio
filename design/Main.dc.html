@@ -1,0 +1,880 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700&family=Geist:wght@100..900&display=swap">
+  <style>
+    @property --nin  { syntax: "<number>"; inherits: true; initial-value: 0; }
+    @property --nout { syntax: "<number>"; inherits: true; initial-value: 0; }
+    @property --night{ syntax: "<number>"; inherits: true; initial-value: 0; }
+
+    body { margin: 0; }
+    a { color: inherit; text-decoration: none; }
+    a:hover { color: inherit; }
+
+    .page {
+      /* ---- day / night source palette (day values lifted from app/globals.css) ---- */
+      --d-surface: #f7f8fc;  --n-surface: #0b0e16;
+      --d-pure:    #ffffff;  --n-pure:    #121826;
+      --d-ink:     #111522;  --n-ink:     #e8edfb;
+      --d-muted:   #5d6578;  --n-muted:   #8994ae;
+      --d-cobalt:  #245bff;  --n-cobalt:  #5b87ff;
+      --d-wash:    #e9eeff;  --n-wash:    #161d2e;
+      --d-hair:    #ccd4e8;  --n-hair:    #1e2740;
+
+      --night: calc(var(--nin) - var(--nout));
+      --surface: color-mix(in oklab, var(--d-surface), var(--n-surface) calc(var(--night) * 100%));
+      --pure:    color-mix(in oklab, var(--d-pure),    var(--n-pure)    calc(var(--night) * 100%));
+      --ink:     color-mix(in oklab, var(--d-ink),     var(--n-ink)     calc(var(--night) * 100%));
+      --muted:   color-mix(in oklab, var(--d-muted),   var(--n-muted)   calc(var(--night) * 100%));
+      --cobalt:  color-mix(in oklab, var(--d-cobalt),  var(--n-cobalt)  calc(var(--night) * 100%));
+      --wash:    color-mix(in oklab, var(--d-wash),    var(--n-wash)    calc(var(--night) * 100%));
+      --hair:    color-mix(in oklab, var(--d-hair),    var(--n-hair)    calc(var(--night) * 100%));
+
+      --page-x: clamp(1.25rem, 3.6vw, 4.5rem);
+      --rail: clamp(4.8rem, 7vw, 8rem);
+      --header-h: 5rem;
+      --ease: cubic-bezier(.16, 1, .3, 1);
+
+      background: var(--surface);
+      color: var(--ink);
+      font-family: "Geist", system-ui, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+
+      /* the two thresholds each own one half of the inversion */
+      timeline-scope: --t-in, --t-out;
+      animation: nin linear both, nout linear both;
+      animation-timeline: --t-in, --t-out;
+      animation-range: cover 32% cover 72%, cover 32% cover 72%;
+    }
+    @keyframes nin  { from { --nin: 0 }  to { --nin: 1 } }
+    @keyframes nout { from { --nout: 0 } to { --nout: 1 } }
+
+    .mono { font-family: "Geist Mono", ui-monospace, monospace; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: clamp(1rem, 1.8vw, 2rem);
+      padding-inline: calc(var(--page-x) + var(--rail)) var(--page-x);
+    }
+    .marker {
+      grid-column: 1 / 4;
+      font-family: "Geist Mono", ui-monospace, monospace;
+      font-size: .63rem; font-weight: 640; letter-spacing: .06em;
+      text-transform: uppercase; color: var(--cobalt);
+    }
+
+    /* ---------------- header ---------------- */
+    .hdr {
+      position: sticky; top: 0; z-index: 30;
+      height: var(--header-h);
+      display: grid; grid-template-columns: var(--rail) minmax(10rem, 1fr) auto auto;
+      align-items: center; padding-inline: var(--page-x);
+      border-bottom: 1px solid var(--hair);
+      background: color-mix(in oklab, var(--surface), transparent 12%);
+      backdrop-filter: blur(14px);
+    }
+    .brand {
+      align-self: stretch; display: flex; align-items: center; gap: .18rem;
+      border-right: 1px solid var(--hair);
+      font-size: 1.45rem; font-weight: 900; letter-spacing: -.085em;
+    }
+    .brand i { align-self: center; color: var(--cobalt); font-size: .48rem; font-style: normal; letter-spacing: 0; transform: translateY(-.65rem); }
+    .wordmark { padding-left: 1.35rem; font-size: .72rem; font-weight: 680; letter-spacing: -.01em; }
+    .hdr nav { display: flex; gap: clamp(1.2rem, 2.3vw, 2.8rem); margin-right: clamp(1.5rem, 3vw, 3.5rem); }
+    .hdr nav a, .resume {
+      position: relative; font-size: .66rem; font-weight: 650;
+      text-transform: uppercase; letter-spacing: .07em;
+    }
+    .hdr nav a::after, .resume::after {
+      content: ""; position: absolute; right: 100%; bottom: -.38rem; left: 0;
+      height: 1px; background: var(--cobalt); transition: right .42s var(--ease);
+    }
+    .hdr nav a:hover::after, .resume:hover::after { right: 0; }
+    .hdr-actions { display: flex; align-items: center; gap: 1.2rem; }
+    .loc { display: flex; gap: .28rem; font-size: .62rem; font-weight: 720; color: var(--muted); }
+    .loc .on { color: var(--cobalt); }
+
+    /* ---------------- the rail: a live trace, not a progress bar ---------------- */
+    .rail {
+      position: fixed; z-index: 50; inset: 0 auto 0 0; pointer-events: none;
+      width: calc(3px + var(--night) * 1px);
+    }
+    .rail__track { position: absolute; inset: 0; background: color-mix(in oklab, var(--hair), transparent 42%); }
+
+    /* the completed part of the trace, with data still flowing through it */
+    .rail__trail {
+      position: absolute; inset: 0; transform-origin: top; transform: scaleY(0); overflow: hidden;
+      background: color-mix(in oklab, var(--cobalt), transparent 62%);
+      animation: railfill linear both; animation-timeline: scroll(root block);
+    }
+    @keyframes railfill { from { transform: scaleY(0) } to { transform: scaleY(1) } }
+    .rail__trail::after {
+      content: ""; position: absolute; inset: -20px 0;
+      background: repeating-linear-gradient(to bottom,
+        transparent 0 9px,
+        color-mix(in oklab, var(--cobalt), transparent 55%) 9px 11px);
+      animation: railflow 1.15s linear infinite;
+    }
+    @keyframes railflow { to { transform: translateY(11px) } }
+
+    /* the packet, plus two decaying echoes riding the same timeline behind it */
+    .rail__packet, .rail__echo {
+      position: absolute; left: -1.5px; width: 6px;
+      animation: railpk linear both; animation-timeline: scroll(root block);
+    }
+    @keyframes railpk { from { transform: translateY(0) } to { transform: translateY(calc(100vh - 26px)) } }
+    .rail__packet {
+      height: 26px; background: var(--cobalt);
+      animation: railpk linear both, pkglow 1.7s ease-in-out infinite;
+      animation-timeline: scroll(root block), auto;
+    }
+    @keyframes pkglow {
+      0%, 100% { box-shadow: 0 0 9px 1px color-mix(in oklab, var(--cobalt), transparent 58%) }
+      50%      { box-shadow: 0 0 22px 5px color-mix(in oklab, var(--cobalt), transparent 26%) }
+    }
+    .rail__echo { background: var(--cobalt) }
+    .rail__echo--1 { top: -15px; height: 17px; opacity: .5 }
+    .rail__echo--2 { top: -30px; height: 11px; opacity: .24 }
+    .rail__echo--3 { top: -42px; height: 6px;  opacity: .11 }
+
+    /* ---------------- hero ---------------- */
+    .hero {
+      position: relative; min-height: calc(100svh - var(--header-h));
+      align-content: center; padding-block: 3rem 4rem; overflow: clip;
+      background-image: linear-gradient(to right, transparent calc(100% - 1px), color-mix(in oklab, var(--hair), transparent 42%) 1px);
+      background-size: calc((100% - var(--page-x) - var(--rail)) / 12) 100%;
+      background-position: calc(var(--page-x) + var(--rail)) 0;
+      background-repeat: repeat-x;
+    }
+    .hero-meta {
+      grid-column: 1 / 13; display: flex; justify-content: space-between;
+      font-size: .62rem; font-weight: 620; letter-spacing: .05em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 2.4rem;
+      opacity: 0; animation: fadeUp .9s var(--ease) .55s both;
+    }
+    .hero-name { grid-column: 1 / 10; position: relative; z-index: 2; }
+    .hero-line { overflow: hidden; }
+    .hero-word {
+      display: block;
+      font-size: clamp(5rem, 10.3vw, 11.7rem);
+      line-height: .76; letter-spacing: -.065em;
+      font-variation-settings: "wght" 760;
+      transform: translateY(0);
+      animation: wordin 1.25s var(--ease) both, wordmass linear both;
+      animation-timeline: auto, view();
+      animation-range: normal, exit 0% exit 100%;
+    }
+    /* each .hero-word is the only child of its line — stagger on the LINE */
+    .hero-name .hero-line:nth-of-type(2) .hero-word { animation-delay: .09s, 0s; }
+    @keyframes wordin { from { transform: translateY(112%) } to { transform: translateY(0) } }
+    /* the departure: the name loses mass and tightens as it leaves */
+    @keyframes wordmass {
+      from { font-variation-settings: "wght" 760; letter-spacing: -.065em; }
+      to   { font-variation-settings: "wght" 300; letter-spacing: -.085em; opacity: .35; }
+    }
+    .hero-role {
+      display: block; margin-top: 1.1rem;
+      font-family: "Geist Mono", ui-monospace, monospace;
+      font-size: .72rem; font-weight: 650; letter-spacing: .04em; color: var(--muted);
+      opacity: 0; animation: fadeUp .9s var(--ease) .7s both;
+    }
+    .hero-focus {
+      grid-column: 1 / 10; margin-top: 2.6rem; padding-top: .9rem;
+      border-top: 1px solid var(--cobalt);
+      font-family: "Geist Mono", ui-monospace, monospace;
+      font-size: .63rem; font-weight: 650; letter-spacing: .045em; color: var(--ink);
+      opacity: 0; animation: fadeUp .9s var(--ease) .8s both;
+    }
+    .hero-intro {
+      grid-column: 10 / 13; align-self: end; z-index: 2;
+      opacity: 0; animation: fadeUp .9s var(--ease) .88s both;
+    }
+    .hero-intro strong { display: block; font-size: clamp(1.25rem, 1.8vw, 1.8rem); font-weight: 620; letter-spacing: -.025em; line-height: 1.15; }
+    .hero-intro p { font-size: .92rem; line-height: 1.55; color: var(--muted); margin: .9rem 0 1.2rem; }
+    .hero-cta { font-size: .66rem; font-weight: 650; text-transform: uppercase; letter-spacing: .07em; color: var(--cobalt); }
+    .hero-status {
+      grid-column: 1 / 13; margin-top: 2.8rem; display: flex; align-items: center; gap: .6rem;
+      font-size: .6rem; color: var(--muted); line-height: 1.4;
+      opacity: 0; animation: fadeUp .9s var(--ease) .96s both;
+    }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--cobalt); animation: pulse 2.4s infinite; }
+    @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(36,91,255,.25) } 55% { box-shadow: 0 0 0 8px rgba(36,91,255,0) } }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(24px) } to { opacity: 1; transform: none } }
+
+    .hero-topo {
+      position: absolute; right: calc(var(--page-x) - 1rem); top: 46%; width: min(38vw, 30rem);
+      transform: translateY(-50%); z-index: 1; opacity: .95;
+      animation: topodrift linear both; animation-timeline: view(); animation-range: cover 0% cover 100%;
+    }
+    @keyframes topodrift { from { transform: translateY(-50%) } to { transform: translateY(-30%) rotate(4deg) scale(1.08) } }
+    .draw { stroke-dasharray: 900; stroke-dashoffset: 900; animation: draw 1.7s var(--ease) .6s both; }
+    .draw:nth-of-type(2) { animation-delay: .72s } .draw:nth-of-type(3) { animation-delay: .84s }
+    @keyframes draw { to { stroke-dashoffset: 0 } }
+    .node { transform-box: fill-box; transform-origin: center; scale: 0; animation: pop .55s cubic-bezier(.34,1.56,.64,1) both; }
+    .node:nth-of-type(2){animation-delay:.06s}.node:nth-of-type(3){animation-delay:.12s}.node:nth-of-type(4){animation-delay:.18s}
+    .node:nth-of-type(5){animation-delay:.24s}.node:nth-of-type(6){animation-delay:.3s}
+    @keyframes pop { to { scale: 1 } }
+
+    /* ---------------- principle ---------------- */
+    .principle { background: var(--wash); padding-block: clamp(6rem, 11vw, 11rem); align-content: center; min-height: 92svh; }
+    .principle h2 {
+      grid-column: 4 / 13; max-width: 12ch; margin: 1.6rem 0 0;
+      font-size: clamp(3.8rem, 7.3vw, 7.5rem); font-weight: 620;
+      letter-spacing: -.06em; line-height: .88; text-wrap: balance;
+    }
+    /* reading-highlight: each word inks as it crosses the reading line. used once. */
+    .read { grid-column: 4 / 11; margin: 2.4rem 0 0; font-size: clamp(1.1rem, 1.7vw, 1.55rem); letter-spacing: -.015em; line-height: 1.5; }
+    .read w {
+      color: var(--ink);
+      animation: ink linear both; animation-timeline: view(); animation-range: entry 100% cover 55%;
+    }
+    @keyframes ink { from { color: color-mix(in oklab, var(--muted), transparent 55%) } to { color: var(--ink) } }
+    .plist { grid-column: 4 / 13; list-style: none; margin: 3.4rem 0 0; padding: 0; }
+    .plist li {
+      display: grid; grid-template-columns: 5rem 1fr auto; align-items: center; gap: 1rem;
+      padding: 1.4rem 0; border-top: 1px solid var(--hair);
+      animation: slidein .9s var(--ease) both; animation-timeline: view(); animation-range: entry 100% cover 30%;
+    }
+    @keyframes slidein { from { opacity: 0; transform: translateX(-8%) } to { opacity: 1; transform: none } }
+    .plist span { font-family: "Geist Mono", ui-monospace, monospace; font-size: .63rem; color: var(--muted); }
+    .plist strong { font-size: clamp(1rem, 1.6vw, 1.35rem); font-weight: 540; }
+    .gauge { width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--cobalt); position: relative; overflow: hidden; }
+    .gauge::after {
+      content: ""; position: absolute; inset: 0; background: var(--cobalt); transform-origin: bottom; transform: scaleY(0);
+      animation: fillg linear both; animation-timeline: view(); animation-range: entry 100% cover 32%;
+    }
+    @keyframes fillg { to { transform: scaleY(1) } }
+
+    /* ---------------- threshold: the inversion ---------------- */
+    .thr { position: relative; min-height: 100svh; display: grid; place-content: center; overflow: clip; text-align: center; }
+    .thr--in  { view-timeline: --t-in block; }
+    .thr--out { view-timeline: --t-out block; }
+    .thr__scan {
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, color-mix(in oklab, var(--cobalt), transparent 88%), transparent 42%);
+      clip-path: inset(calc(100% - var(--night) * 100%) 0 0 0);
+      border-top: 1px solid var(--cobalt);
+    }
+    .thr--out .thr__scan { clip-path: inset(0 0 calc(var(--night) * 100%) 0); }
+    .thr__read {
+      position: relative; font-family: "Geist Mono", ui-monospace, monospace;
+      font-size: .7rem; font-weight: 600; letter-spacing: .18em; text-transform: uppercase;
+      color: var(--muted); display: flex; gap: 1.4rem; align-items: center;
+    }
+    .thr__read b { color: var(--cobalt); font-weight: 600; }
+    .thr__big {
+      position: relative; margin-top: 1.6rem;
+      font-size: clamp(2.6rem, 6vw, 5.2rem); font-weight: 300;
+      letter-spacing: -.05em; line-height: 1; color: var(--ink);
+    }
+    .thr__hint { position: relative; margin-top: 2rem; font-size: .58rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+
+    /* ---------------- systems (night) ---------------- */
+    .work { padding-block: clamp(7rem, 10vw, 11rem) 0; }
+    .work h2 {
+      grid-column: 4 / 12; max-width: 13ch; margin: 1.6rem 0 0;
+      font-size: clamp(3.3rem, 6vw, 6.5rem); font-weight: 620; letter-spacing: -.055em; line-height: .91; text-wrap: balance;
+    }
+    .work-intro { grid-column: 9 / 13; align-self: end; color: var(--muted); font-size: .95rem; }
+    .work-intro small { display: block; margin-top: 1rem; font-size: .68rem; opacity: .8; }
+    .case {
+      display: grid; grid-template-columns: 1.1fr 4.2fr 5.7fr; gap: clamp(1rem, 1.8vw, 2rem);
+      padding: 5rem var(--page-x) 5rem calc(var(--page-x) + var(--rail));
+      border-top: 1px solid var(--hair); margin-top: 5rem;
+      view-timeline: --case block;
+    }
+    .case-idx { position: sticky; top: 8rem; align-self: start; }
+    .case-idx b { display: block; font-family: "Geist Mono", ui-monospace, monospace; font-size: 1.5rem; color: var(--cobalt); font-weight: 600; }
+    .case-idx em { display: block; font-style: normal; margin-top: .6rem; font-size: .8rem; font-weight: 620; }
+    .case-idx i { display: block; font-style: normal; margin-top: .3rem; font-size: .63rem; color: var(--muted); }
+    .case-copy h3 {
+      max-width: 10ch; margin: 0 0 2.6rem;
+      font-size: clamp(2.4rem, 4.2vw, 4.4rem); font-weight: 620; letter-spacing: -.055em; line-height: .9; text-wrap: balance;
+    }
+    .step { padding: 1.5rem 0; border-top: 1px solid var(--hair); }
+    .step > span { font-family: "Geist Mono", ui-monospace, monospace; font-size: .6rem; letter-spacing: .06em; text-transform: uppercase; color: var(--cobalt); }
+    .step p {
+      margin: .7rem 0 0; max-width: 32rem; font-size: clamp(1rem, 1.35vw, 1.2rem);
+      letter-spacing: -.012em; line-height: 1.54; color: var(--muted);
+      animation: stepon linear both; animation-timeline: view(); animation-range: entry 100% cover 45%;
+    }
+    @keyframes stepon { from { opacity: .18; transform: translateY(18px) } to { opacity: 1; transform: none; color: var(--ink) } }
+    .tags { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 2rem; }
+    .tags span {
+      font-family: "Geist Mono", ui-monospace, monospace; font-size: .54rem; text-transform: uppercase;
+      letter-spacing: .06em; padding: .38rem .6rem; border: 1px solid var(--hair); color: var(--muted);
+    }
+    .case-map { position: sticky; top: 10vh; align-self: start; height: 74svh; background: var(--pure); border: 1px solid var(--hair); padding: 1.4rem; display: flex; flex-direction: column; }
+    .case-map figcaption { font-family: "Geist Mono", ui-monospace, monospace; font-size: .58rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 1rem; }
+    .case-map svg { flex: 1; width: 100%; }
+    /* driven by the ARTICLE, not by the pinned panel's own box */
+    .edge { stroke-dasharray: 400; stroke-dashoffset: 400; animation: draw2 linear both;
+      animation-timeline: --case; animation-range: contain 0% contain 62%; }
+    @keyframes draw2 { to { stroke-dashoffset: 0 } }
+    .sname { font-family: "Geist Mono", ui-monospace, monospace; font-size: 9px; letter-spacing: .04em; }
+
+    /* ---------------- writing: the beacon ---------------- */
+    .writing { background: var(--d-cobalt); color: #fff; padding-block: clamp(5rem, 8vw, 8rem); min-height: 82svh; align-content: center; }
+    .writing .marker { color: rgba(255,255,255,.74); grid-column: 1 / 13; }
+    .wmarq { grid-column: 1 / 13; overflow: hidden; border-block: 1px solid rgba(255,255,255,.42); padding: .5rem 0; margin: 1.4rem 0 2.4rem; }
+    .wmarq b {
+      display: inline-block; white-space: nowrap; font-weight: 500;
+      font-family: "Geist Mono", ui-monospace, monospace; font-size: .62rem; letter-spacing: .18em; text-transform: uppercase; color: rgba(255,255,255,.82);
+      animation: marq linear both; animation-timeline: view(); animation-range: cover 0% cover 100%;
+    }
+    @keyframes marq { from { transform: translateX(4%) } to { transform: translateX(-46%) } }
+    .writing h2 { grid-column: 1 / 8; max-width: 10ch; margin: 0; font-size: clamp(2.8rem, 6vw, 6rem); font-weight: 620; letter-spacing: -.04em; line-height: .9; }
+    .wsvg { grid-column: 8 / 13; align-self: center; }
+    .writing-bottom { grid-column: 1 / 13; display: flex; justify-content: space-between; align-items: end; gap: 2rem; margin-top: 3rem; }
+    .writing-bottom p { max-width: 38rem; font-size: 1rem; line-height: 1.68; color: rgba(255,255,255,.82); margin: 0; }
+    .writing-bottom a { font-size: .66rem; font-weight: 650; text-transform: uppercase; letter-spacing: .07em; white-space: nowrap; }
+
+    /* ---------------- research (night) ---------------- */
+    .research { background: var(--wash); padding-block: clamp(6rem, 10vw, 10rem); align-content: center; min-height: 100svh; }
+    /* one row, three columns: gutter marker | copy | visual. the copy sits BESIDE the photo. */
+    .research .marker { grid-column: 1 / 4; grid-row: 1; align-self: start; padding-top: .5rem; }
+    .research-copy { grid-column: 4 / 8; grid-row: 1; align-self: center; }
+    .research-copy h2 { max-width: 9ch; margin: 0; font-size: clamp(2.6rem, 5.2vw, 4.8rem); font-weight: 620; letter-spacing: -.04em; line-height: .9; text-wrap: balance; }
+    .research-copy p { margin: 1.5rem 0 0; color: var(--muted); }
+    .research-copy .thesis { margin-top: 1.3rem; font-size: clamp(1.15rem, 1.8vw, 1.7rem); line-height: 1.3; color: var(--cobalt); font-weight: 620; }
+    .rtags { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: 1.5rem; }
+    .rtags span { font-family: "Geist Mono", ui-monospace, monospace; font-size: .54rem; text-transform: uppercase; letter-spacing: .06em; padding: .38rem .6rem; border: 1px solid var(--hair); color: var(--muted); }
+    .rvis { grid-column: 8 / 13; grid-row: 1; position: relative; min-height: 34rem; align-self: center; }
+    .rphoto {
+      position: absolute; inset: 0; overflow: hidden; margin: 0;
+      background: #223; border: 1px solid var(--hair);
+      clip-path: inset(0);
+      animation: reveal linear both; animation-timeline: view(); animation-range: entry 65% cover 50%;
+    }
+    @keyframes reveal { from { clip-path: inset(18% 10% 18% 10%) } to { clip-path: inset(0) } }
+    .rphoto img {
+      width: 100%; height: 100%; object-fit: cover; display: block;
+      animation: lightup linear both; animation-timeline: view(); animation-range: entry 65% cover 60%;
+    }
+    /* in night mode the campus is where the light comes back */
+    @keyframes lightup {
+      from { filter: grayscale(1) brightness(.42) contrast(1.1); transform: scale(1.12) }
+      to   { filter: none; transform: scale(1.02) }
+    }
+    .rloop {
+      position: absolute; left: -12%; top: -8%; width: 62%;
+      animation: loopturn linear both; animation-timeline: view(); animation-range: cover 0% cover 100%;
+    }
+    @keyframes loopturn { from { transform: rotate(0deg) scale(.86) } to { transform: rotate(360deg) scale(1) } }
+    .rcore {
+      position: absolute; left: 6%; top: 16%; font-family: "Geist Mono", ui-monospace, monospace;
+      font-size: .6rem; letter-spacing: .14em; text-transform: uppercase; color: #fff;
+      text-shadow: 0 1px 3px rgba(17,21,34,.6); line-height: 1.9; text-align: center;
+    }
+    .rcap { position: absolute; right: 0; bottom: -2.2rem; font-family: "Geist Mono", ui-monospace, monospace; font-size: .56rem; letter-spacing: .06em; color: var(--muted); }
+
+    /* ---------------- trajectory: the trace waterfall ---------------- */
+    .path { padding-block: clamp(7rem, 11vw, 11rem); align-content: center; min-height: 100svh; }
+    .path h2 { grid-column: 4 / 12; max-width: 12ch; margin: 1.6rem 0 0; font-size: clamp(3rem, 6.5vw, 7rem); font-weight: 620; letter-spacing: -.06em; line-height: .89; text-wrap: balance; }
+    .path > p { grid-column: 8 / 13; align-self: end; color: var(--muted); margin: 0; }
+    .wf { grid-column: 4 / 13; margin-top: 4rem; }
+    .wf__axis {
+      display: grid; grid-template-columns: 13rem 1fr; gap: 1.5rem;
+      font-family: "Geist Mono", ui-monospace, monospace; font-size: .58rem;
+      letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+      padding-bottom: .7rem; border-bottom: 1px solid var(--hair);
+    }
+    /* ticks sit at their true position on the axis, not evenly spread */
+    .wf__ticks { position: relative; height: 1.1em; }
+    .wf__ticks span { position: absolute; left: var(--x); transform: translateX(-50%); }
+    .wf__ticks span:first-child { transform: none; }
+    .wf__ticks span.now { color: var(--cobalt); }
+    .wf__row {
+      display: grid; grid-template-columns: 13rem 1fr; gap: 1.5rem; align-items: center;
+      padding: 1.15rem 0; border-bottom: 1px solid var(--hair);
+    }
+    .wf__label b { display: block; font-size: .95rem; font-weight: 640; letter-spacing: -.02em; }
+    .wf__label i { display: block; font-style: normal; font-size: .68rem; color: var(--muted); margin-top: .15rem; }
+    .wf__lane { position: relative; height: 26px; }
+    .wf__lane::before {
+      content: ""; position: absolute; inset: 50% 0 auto; height: 1px;
+      background: repeating-linear-gradient(to right, var(--hair) 0 3px, transparent 3px 9px);
+    }
+    /* the "now" line runs through every lane and reads as one continuous edge */
+    .wf__lane::after {
+      content: ""; position: absolute; left: 90.5%; top: -1.15rem; bottom: -1.15rem; width: 1px;
+      background: repeating-linear-gradient(to bottom, var(--cobalt) 0 3px, transparent 3px 7px);
+      opacity: .45;
+    }
+    .wf__nest { display: inline-block; width: 1rem; }
+    /* the master's has a known projected end — drawn, but drawn as a projection */
+    .wf__proj {
+      position: absolute; top: 8px; bottom: 8px; left: var(--s); width: var(--w);
+      border: 1px dashed color-mix(in oklab, var(--cobalt), transparent 55%); border-left: 0;
+    }
+    .wf__span {
+      position: absolute; top: 3px; bottom: 3px;
+      left: var(--s); width: var(--w);
+      background: color-mix(in oklab, var(--cobalt), transparent 78%);
+      border-left: 2px solid var(--cobalt);
+      transform-origin: left; transform: scaleX(0);
+      animation: spangrow .9s var(--ease) both; animation-timeline: view(); animation-range: entry 100% cover 28%;
+    }
+    @keyframes spangrow { to { transform: scaleX(1) } }
+    .wf__span.open {
+      border-right: 0;
+      background: linear-gradient(to right, color-mix(in oklab, var(--cobalt), transparent 70%), color-mix(in oklab, var(--cobalt), transparent 94%));
+    }
+    .wf__span.open::after {
+      content: ""; position: absolute; right: -2px; top: 0; bottom: 0; width: 2px;
+      background: var(--cobalt); animation: blink 1.8s steps(2) infinite;
+    }
+    @keyframes blink { 50% { opacity: .25 } }
+    .wf__span em {
+      position: absolute; right: .55rem; top: 50%; translate: 0 -50%;
+      font-style: normal; font-family: "Geist Mono", ui-monospace, monospace;
+      font-size: .55rem; letter-spacing: .06em; text-transform: uppercase; color: var(--cobalt);
+    }
+    /* keep open labels inside the bar: outside they overrun the lane and collide with the projection */
+    .wf__span.open em { right: .6rem; left: auto; }
+    .wf__note { display: flex; justify-content: space-between; gap: 1rem; margin-top: 1.1rem; font-family: "Geist Mono", ui-monospace, monospace; font-size: .56rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+    /* span attributes — measured outcomes, hung off the span that earned them */
+    .wf__attrs { grid-column: 2; display: flex; flex-wrap: wrap; gap: .4rem; padding: .1rem 0 .3rem; }
+    .wf__attrs span {
+      display: inline-flex; align-items: baseline; gap: .45rem;
+      font-family: "Geist Mono", ui-monospace, monospace; font-size: .57rem; letter-spacing: .04em;
+      padding: .3rem .55rem; border: 1px solid var(--hair); color: var(--ink);
+    }
+    .wf__attrs b { color: var(--cobalt); font-weight: 500; text-transform: uppercase; letter-spacing: .07em; font-size: .52rem; }
+    /* measured outcomes inside a case study */
+    .metrics { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1.2rem; }
+    .metrics span {
+      display: inline-flex; align-items: baseline; gap: .5rem;
+      font-family: "Geist Mono", ui-monospace, monospace; font-size: .58rem; letter-spacing: .05em;
+      padding: .45rem .7rem; border-left: 2px solid var(--cobalt); background: var(--wash); color: var(--muted);
+    }
+    .metrics b { font-size: .95rem; letter-spacing: -.02em; color: var(--cobalt); font-weight: 600; }
+    .flag { color: var(--cobalt); border: 1px dashed var(--cobalt); padding: .2rem .45rem; }
+
+    /* ---------------- contact ---------------- */
+    .contact { position: relative; padding-block: clamp(4rem, 8vw, 7rem); min-height: 100svh; align-content: center; overflow: clip; }
+    .contact h2 {
+      grid-column: 4 / 10; max-width: 9ch; margin: 1.6rem 0 0;
+      font-size: clamp(3.4rem, 8vw, 8.5rem); font-weight: 300; letter-spacing: -.07em; line-height: .82;
+      font-variation-settings: "wght" 620;
+      animation: mass2 linear both; animation-timeline: view(); animation-range: entry 0% cover 40%;
+    }
+    @keyframes mass2 {
+      from { font-variation-settings: "wght" 250; letter-spacing: -.09em; opacity: .3 }
+      to   { font-variation-settings: "wght" 620; letter-spacing: -.07em; opacity: 1 }
+    }
+    .contact > p { grid-column: 4 / 9; margin: 1.6rem 0 0; color: var(--muted); }
+    .cta {
+      grid-column: 4 / 10; margin-top: 2rem; display: flex; justify-content: space-between; align-items: center;
+      border-block: 1px solid var(--cobalt); padding: 1.1rem 0; color: var(--cobalt);
+      font-size: clamp(1.05rem, 2vw, 1.7rem); font-weight: 620; letter-spacing: -.02em;
+      transition: padding-inline .42s var(--ease), background .42s var(--ease), color .42s var(--ease);
+    }
+    .cta:hover { padding-inline: 1rem; background: var(--cobalt); color: #fff; }
+    .cvis { position: absolute; right: var(--page-x); top: 50%; translate: 0 -50%; width: min(34vw, 28rem); opacity: .9; }
+    .cbottom {
+      grid-column: 1 / 13; display: grid; grid-template-columns: 1fr 1fr auto; gap: 1rem; margin-top: 4rem;
+      padding-top: 1.2rem; border-top: 1px solid var(--hair);
+      font-family: "Geist Mono", ui-monospace, monospace; font-size: .56rem;
+      letter-spacing: .07em; text-transform: uppercase; color: var(--muted);
+    }
+    .cbottom div { display: flex; gap: 1.2rem; }
+    .cbottom a:hover { color: var(--cobalt); }
+
+    /* ---------------- progressive blur edges ---------------- */
+    .edgeblur {
+      position: fixed; left: 0; right: 0; height: 3.5rem; z-index: 20; pointer-events: none;
+      backdrop-filter: blur(3px);
+    }
+    .edgeblur--b { bottom: 0; mask-image: linear-gradient(to top, #000 12%, transparent); }
+
+    /* ---------------- reduced motion: content is legible at rest ---------------- */
+    @media (prefers-reduced-motion: reduce) {
+      .page, .page * { animation: none !important; transition: none !important; }
+      .page { --night: 0 }
+      .zone-night { --night: 1 }
+      .thr--in .thr__scan { clip-path: inset(0) } .thr--out .thr__scan { clip-path: inset(0) }
+      .hero-word { font-variation-settings: "wght" 760 }
+      .contact h2 { font-variation-settings: "wght" 620 }
+      .rail__trail { transform: scaleY(1) }
+      .rail__trail::after { display: none }
+      .rail__echo { display: none }
+      .wf__span { transform: scaleX(1) }
+      .gauge::after { transform: scaleY(1) }
+      .edge, .draw { stroke-dashoffset: 0 }
+      .node { scale: 1 }
+      .hero-meta, .hero-role, .hero-focus, .hero-intro, .hero-status { opacity: 1 }
+    }
+    .page.rm, .page.rm * { animation: none !important; transition: none !important; }
+    .page.rm { --night: 0 }
+    .page.rm .zone-night { --night: 1 }
+    .page.rm .thr__scan { clip-path: inset(0) }
+    .page.rm .hero-word { font-variation-settings: "wght" 760 }
+    .page.rm .contact h2 { font-variation-settings: "wght" 620 }
+    .page.rm .rail__trail { transform: scaleY(1) }
+    .page.rm .rail__trail::after { display: none }
+    .page.rm .rail__echo { display: none }
+    .page.rm .wf__span { transform: scaleX(1) }
+    .page.rm .gauge::after { transform: scaleY(1) }
+    .page.rm .edge, .page.rm .draw { stroke-dashoffset: 0 }
+    .page.rm .node { scale: 1 }
+    .page.rm .hero-meta, .page.rm .hero-role, .page.rm .hero-focus,
+    .page.rm .hero-intro, .page.rm .hero-status { opacity: 1 }
+
+    @media (max-width: 900px) {
+      .page { --rail: 2.4rem }
+      .hdr nav { display: none }
+      .hero-name, .hero-focus { grid-column: 1 / 13 }
+      .hero-intro { grid-column: 1 / 13; margin-top: 2rem }
+      .hero-topo { display: none }
+      .case { grid-template-columns: 1fr; }
+      .case-map { position: static; height: 40svh }
+      .research .marker, .research-copy { grid-column: 1 / 13; grid-row: auto }
+      .rvis { grid-column: 1 / 13; grid-row: auto; margin-top: 2.5rem }
+      .principle h2, .read, .plist, .work h2, .path h2, .wf, .contact h2, .contact > p, .cta { grid-column: 1 / 13 }
+      .work-intro, .path > p { grid-column: 1 / 13; margin-top: 1.5rem }
+      .wf__axis, .wf__row { grid-template-columns: 7.5rem 1fr; gap: .8rem }
+      .wf__attrs { grid-column: 1 / -1 }
+      .writing h2, .wsvg { grid-column: 1 / 13 }
+    }
+  </style>
+</helmet>
+
+<div class="page {{rm}}">
+
+  <div class="rail" aria-hidden="true">
+    <div class="rail__track"></div>
+    <div class="rail__trail"></div>
+    <div class="rail__echo rail__echo--3"></div>
+    <div class="rail__echo rail__echo--2"></div>
+    <div class="rail__echo rail__echo--1"></div>
+    <div class="rail__packet"></div>
+  </div>
+  <div class="edgeblur edgeblur--b" aria-hidden="true"></div>
+
+  <header class="hdr">
+    <span class="brand">VR<i>&#174;</i></span>
+    <span class="wordmark">Vin&#237;cius Romualdo</span>
+    <nav><a href="#">Systems</a><a href="#">Research</a><a href="#">Trajectory</a><a href="#">Contact</a></nav>
+    <div class="hdr-actions">
+      <span class="loc"><b class="on">EN</b><i>/</i><b>PT</b></span>
+      <a class="resume" href="#">R&#233;sum&#233; &#8599;&#xfe0e;</a>
+    </div>
+  </header>
+
+  <!-- ============ HERO ============ -->
+  <section class="hero grid">
+    <div class="hero-meta"><span>Software engineer &#183; Creative technologist</span><span>Macei&#243;, Brazil &#183; 14:32 BRT</span></div>
+    <div class="hero-name">
+      <div class="hero-line"><span class="hero-word">Vin&#237;cius</span></div>
+      <div class="hero-line"><span class="hero-word">Romualdo</span></div>
+      <span class="hero-role">SOFTWARE ENGINEER</span>
+    </div>
+    <svg class="hero-topo" viewBox="0 0 520 300" fill="none" aria-hidden="true">
+      <path class="draw" d="M40 250 C 140 250 150 160 240 160 S 360 90 470 90" stroke="#245bff" stroke-width="1.2"/>
+      <path class="draw" d="M40 250 C 130 250 170 210 260 212 S 380 200 470 172" stroke="#245bff" stroke-width="1.2" opacity=".55"/>
+      <path class="draw" d="M240 160 C 300 160 310 40 400 44" stroke="currentColor" stroke-width="1" stroke-dasharray="4 5" opacity=".3"/>
+      <circle class="node" cx="40" cy="250" r="5" fill="#245bff"/>
+      <circle class="node" cx="240" cy="160" r="6" fill="#245bff"/>
+      <circle class="node" cx="260" cy="212" r="4" fill="#245bff" opacity=".6"/>
+      <circle class="node" cx="400" cy="44" r="4" fill="currentColor" opacity=".35"/>
+      <circle class="node" cx="470" cy="90" r="7" fill="none" stroke="#245bff" stroke-width="1.4"/>
+      <circle class="node" cx="470" cy="90" r="13" fill="none" stroke="#245bff" stroke-width=".8" opacity=".4"/>
+    </svg>
+    <div class="hero-focus">FINTECH &#183; DISTRIBUTED SYSTEMS &#183; RELIABILITY &#183; ADAPTIVE SECURITY</div>
+    <div class="hero-intro">
+      <strong>Systems, decisions, impact.</strong>
+      <p>I design the logic behind high-trust financial products&#8212;and turn distributed complexity into experiences people can rely on.</p>
+      <a class="hero-cta" href="#">Follow the signal &#8595;&#xfe0e;</a>
+    </div>
+    <div class="hero-status"><span class="dot"></span><span>Building fintech at iFood &#183; Researching adaptive security at USP</span></div>
+  </section>
+
+  <!-- ============ 00 PRINCIPLE ============ -->
+  <section class="principle grid">
+    <div class="marker">00 / Operating principle</div>
+    <h2>Reliability is a creative medium.</h2>
+    <p class="read"><w>The </w><w>best </w><w>systems </w><w>do </w><w>not </w><w>expose </w><w>their </w><w>complexity. </w><w>They </w><w>transform </w><w>it </w><w>into </w><w>confidence: </w><w>one </w><w>clear </w><w>state, </w><w>one </w><w>explainable </w><w>decision, </w><w>one </w><w>experience </w><w>that </w><w>earns </w><w>trust.</w></p>
+    <ol class="plist">
+      <li><span>01</span><strong>Make complexity legible</strong><span class="gauge"></span></li>
+      <li><span>02</span><strong>Design for failure before it arrives</strong><span class="gauge"></span></li>
+      <li><span>03</span><strong>Turn constraints into leverage</strong><span class="gauge"></span></li>
+    </ol>
+  </section>
+
+  <!-- ============ THRESHOLD IN ============ -->
+  <section class="thr thr--in">
+    <div class="thr__scan"></div>
+    <div class="thr__read"><span>MODE</span><b>DAY &#9472;&#9472;&#9654; INSTRUMENT</b></div>
+    <div class="thr__big">Follow the signal.</div>
+    <div class="thr__hint">entering the systems</div>
+  </section>
+
+  <div class="zone-night">
+    <!-- ============ 01 SYSTEMS ============ -->
+    <section class="work">
+      <div class="grid">
+        <div class="marker">01 / Selected systems</div>
+        <h2>Engineering stories, told through decisions.</h2>
+        <div class="work-intro">
+          Three chapters across financial infrastructure, platform engineering and adaptive security. Each begins with tension and ends with a system that behaves more clearly.
+          <small>Product narratives are intentionally generalized to respect confidentiality.</small>
+        </div>
+      </div>
+
+      <article class="case">
+        <div class="case-idx"><b>01</b><em>Money in motion</em><i>Fintech &#183; Distributed systems</i></div>
+        <div class="case-copy">
+          <h3>Pix keys, without the uncertainty.</h3>
+          <div class="step"><span>01 / Context</span><p>A payment key looks simple. Behind it live ownership, claims, asynchronous events and reconciliation across multiple boundaries.</p></div>
+          <div class="step"><span>02 / Decision</span><p>Model consistency as a visible journey&#8212;not as the illusion of one synchronous request.</p></div>
+          <div class="step"><span>03 / Architecture</span><p>Event-driven state transitions, idempotent consumers and reconciliation paths keep every participant aligned.</p></div>
+          <div class="step"><span>04 / Outcome</span><p>Clear states across an asynchronous journey, with failure designed as part of the product&#8212;not hidden beneath it.</p></div>
+          <div class="tags"><span>Go</span><span>Kotlin</span><span>CQRS</span><span>PostgreSQL</span><span>SQS</span><span>Kubernetes</span></div>
+          <div class="metrics"><span><b>1 of 3</b> core platforms led end to end at iFood</span></div>
+        </div>
+        <figure class="case-map">
+          <figcaption>01 / Live system map</figcaption>
+          <svg viewBox="0 0 420 380" fill="none">
+            <path class="edge" d="M60 40 L60 96" stroke="currentColor" stroke-width="1.2" opacity=".5"/>
+            <path class="edge" d="M60 130 L60 186" stroke="currentColor" stroke-width="1.2" opacity=".5"/>
+            <path class="edge" d="M60 220 L60 276" stroke="currentColor" stroke-width="1.2" opacity=".5"/>
+            <path class="edge" d="M60 310 L200 310 L200 40 L340 40" stroke="#5b87ff" stroke-width="1.4"/>
+            <path class="edge" d="M96 203 C 170 203 176 128 96 118" stroke="#5b87ff" stroke-width="1.1" stroke-dasharray="4 4" opacity=".7"/>
+            <rect x="16" y="22" width="88" height="34" rx="0" stroke="#5b87ff" stroke-width="1.2"/>
+            <rect x="16" y="112" width="88" height="34" stroke="currentColor" stroke-width="1" opacity=".6"/>
+            <rect x="16" y="202" width="88" height="34" stroke="currentColor" stroke-width="1" opacity=".6"/>
+            <rect x="16" y="292" width="88" height="34" stroke="currentColor" stroke-width="1" opacity=".6"/>
+            <rect x="300" y="22" width="104" height="34" stroke="#5b87ff" stroke-width="1.4"/>
+            <text class="sname" x="26" y="43" fill="currentColor">key.request</text>
+            <text class="sname" x="26" y="133" fill="currentColor">ownership.check</text>
+            <text class="sname" x="26" y="223" fill="currentColor">claim.open</text>
+            <text class="sname" x="26" y="313" fill="currentColor">reconcile</text>
+            <text class="sname" x="310" y="43" fill="currentColor">key.active</text>
+            <text class="sname" x="120" y="170" fill="#5b87ff">retry &#183; idempotent</text>
+            <circle cx="200" cy="310" r="4" fill="#5b87ff"/>
+          </svg>
+        </figure>
+      </article>
+
+      <article class="case">
+        <div class="case-idx"><b>02</b><em>Trust at scale</em><i>Platform engineering</i></div>
+        <div class="case-copy">
+          <h3>Audit became a product capability.</h3>
+          <div class="step"><span>01 / Context</span><p>Compliance data was essential, but every team solving it independently multiplied friction, gaps and maintenance cost.</p></div>
+          <div class="step"><span>02 / Decision</span><p>Create one reusable foundation that made the correct path the easiest path for product teams.</p></div>
+          <div class="step"><span>03 / Architecture</span><p>A normalized event contract, shared capture layer and observable pipeline separated policy from product code.</p></div>
+          <div class="step"><span>04 / Outcome</span><p>Shared traceability with lower adoption cost&#8212;and a platform capability that improved as more teams used it.</p></div>
+          <div class="tags"><span>Go</span><span>Kafka</span><span>DDD</span><span>Observability</span></div>
+        </div>
+        <figure class="case-map">
+          <figcaption>02 / Live system map</figcaption>
+          <svg viewBox="0 0 420 380" fill="none">
+            <path class="edge" d="M70 60 L190 190" stroke="currentColor" stroke-width="1" opacity=".5"/>
+            <path class="edge" d="M70 190 L190 190" stroke="currentColor" stroke-width="1" opacity=".5"/>
+            <path class="edge" d="M70 320 L190 190" stroke="currentColor" stroke-width="1" opacity=".5"/>
+            <path class="edge" d="M230 190 L340 120" stroke="#5b87ff" stroke-width="1.4"/>
+            <path class="edge" d="M230 190 L340 260" stroke="#5b87ff" stroke-width="1.4"/>
+            <rect x="16" y="44" width="54" height="32" stroke="currentColor" stroke-width="1" opacity=".6"/>
+            <rect x="16" y="174" width="54" height="32" stroke="currentColor" stroke-width="1" opacity=".6"/>
+            <rect x="16" y="304" width="54" height="32" stroke="currentColor" stroke-width="1" opacity=".6"/>
+            <rect x="190" y="164" width="40" height="52" stroke="#5b87ff" stroke-width="1.5"/>
+            <rect x="340" y="104" width="64" height="32" stroke="#5b87ff" stroke-width="1.2"/>
+            <rect x="340" y="244" width="64" height="32" stroke="#5b87ff" stroke-width="1.2"/>
+            <text class="sname" x="18" y="36" fill="currentColor">team a</text>
+            <text class="sname" x="18" y="166" fill="currentColor">team b</text>
+            <text class="sname" x="18" y="296" fill="currentColor">team c</text>
+            <text class="sname" x="176" y="152" fill="#5b87ff">capture</text>
+            <text class="sname" x="342" y="96" fill="currentColor">audit log</text>
+            <text class="sname" x="342" y="236" fill="currentColor">metrics</text>
+          </svg>
+        </figure>
+      </article>
+
+      <article class="case">
+        <div class="case-idx"><b>03</b><em>Systems with instincts</em><i>Research &#183; Cybersecurity</i></div>
+        <div class="case-copy">
+          <h3>What if software noticed danger first?</h3>
+          <div class="step"><span>01 / Context</span><p>Microservices scale quickly. Their attack surface and operational uncertainty grow just as fast.</p></div>
+          <div class="step"><span>02 / Decision</span><p>Connect detection, prevention and recovery in one continuous adaptive feedback loop.</p></div>
+          <div class="step"><span>03 / Architecture</span><p>MAPE-K coordinates monitoring, analysis, planning and execution around a shared model of system knowledge.</p></div>
+          <div class="step"><span>04 / Outcome</span><p>A research direction toward software that can move from reacting to threats to anticipating them.</p></div>
+          <div class="tags"><span>MAPE-K</span><span>Microservices</span><span>Security</span><span>AI</span></div>
+        </div>
+        <figure class="case-map">
+          <figcaption>03 / Live system map</figcaption>
+          <svg viewBox="0 0 420 380" fill="none">
+            <path class="edge" d="M210 60 A 130 130 0 0 1 340 190" stroke="#5b87ff" stroke-width="1.5"/>
+            <path class="edge" d="M340 190 A 130 130 0 0 1 210 320" stroke="#5b87ff" stroke-width="1.5"/>
+            <path class="edge" d="M210 320 A 130 130 0 0 1 80 190" stroke="#5b87ff" stroke-width="1.5"/>
+            <path class="edge" d="M80 190 A 130 130 0 0 1 210 60" stroke="#5b87ff" stroke-width="1.5"/>
+            <circle cx="210" cy="190" r="42" stroke="currentColor" stroke-width="1" opacity=".6"/>
+            <circle cx="210" cy="60" r="7" fill="#5b87ff"/>
+            <circle cx="340" cy="190" r="7" fill="#5b87ff"/>
+            <circle cx="210" cy="320" r="7" fill="#5b87ff"/>
+            <circle cx="80" cy="190" r="7" fill="#5b87ff"/>
+            <text class="sname" x="188" y="44" fill="currentColor">monitor</text>
+            <text class="sname" x="352" y="194" fill="currentColor">analyze</text>
+            <text class="sname" x="192" y="344" fill="currentColor">execute</text>
+            <text class="sname" x="26" y="194" fill="currentColor">plan</text>
+            <text class="sname" x="188" y="194" fill="#5b87ff">knowledge</text>
+          </svg>
+        </figure>
+      </article>
+    </section>
+
+    <!-- ============ WRITING: the beacon ============ -->
+    <section class="writing grid">
+      <div class="marker">Featured field note</div>
+      <div class="wmarq"><b>Spring Boot &#183; Clean Architecture &#183; Trade-offs &#160;&#160;&#183;&#160;&#160; Spring Boot &#183; Clean Architecture &#183; Trade-offs &#160;&#160;&#183;&#160;&#160; Spring Boot &#183; Clean Architecture &#183; Trade-offs</b></div>
+      <h2>Is Clean Architecture always a good idea?</h2>
+      <svg class="wsvg" viewBox="0 0 420 220" fill="none" aria-hidden="true">
+        <path d="M20 40 L170 110" stroke="rgba(255,255,255,.5)" stroke-width="1"/>
+        <path d="M20 110 L170 110" stroke="rgba(255,255,255,.5)" stroke-width="1"/>
+        <path d="M20 180 L170 110" stroke="rgba(255,255,255,.5)" stroke-width="1"/>
+        <path d="M210 110 L390 60" stroke="#fff" stroke-width="1.2"/>
+        <path d="M210 110 L390 165" stroke="#fff" stroke-width="1.2"/>
+        <circle cx="20" cy="40" r="4" fill="rgba(255,255,255,.7)"/>
+        <circle cx="20" cy="110" r="4" fill="rgba(255,255,255,.7)"/>
+        <circle cx="20" cy="180" r="4" fill="rgba(255,255,255,.7)"/>
+        <circle cx="190" cy="110" r="18" stroke="#fff" stroke-width="1.4"/>
+        <circle cx="190" cy="110" r="6" fill="#fff"/>
+        <circle cx="390" cy="60" r="5" fill="#fff"/>
+        <circle cx="390" cy="165" r="5" fill="#fff"/>
+      </svg>
+      <div class="writing-bottom">
+        <p>A practical argument about boundaries, abstractions and the moment architectural discipline becomes accidental complexity.</p>
+        <a href="#">Read on Medium &#8599;&#xfe0e;</a>
+      </div>
+    </section>
+
+    <!-- ============ 02 RESEARCH ============ -->
+    <section class="research grid">
+      <div class="marker">02 / Current research</div>
+      <div class="research-copy">
+        <h2>Can software develop instincts?</h2>
+        <p>At USP, I research self-adaptive security for microservices: systems that can detect, prevent and recover from threats with increasing autonomy.</p>
+        <div class="thesis">From software that reacts to software that anticipates.</div>
+        <div class="rtags"><span>Self-protection</span><span>Self-healing</span><span>Microservice security</span></div>
+      </div>
+      <div class="rvis">
+        <figure class="rphoto"><img src="./usp.jpg" alt="Entrance to the EESC-USP campus in Sao Carlos"></figure>
+        <svg class="rloop" viewBox="0 0 200 200" fill="none" aria-hidden="true">
+          <circle cx="100" cy="100" r="72" stroke="#fff" stroke-width="1.2" opacity=".85"/>
+          <circle cx="100" cy="100" r="52" fill="rgba(36,91,255,.18)"/>
+          <circle cx="100" cy="28" r="6" fill="#fff"/>
+          <circle cx="172" cy="100" r="6" fill="#fff"/>
+          <circle cx="100" cy="172" r="6" fill="#fff"/>
+          <circle cx="28" cy="100" r="6" fill="#fff"/>
+        </svg>
+        <div class="rcore">MAPE<br>&#8635;<br>KNOWLEDGE</div>
+        <figcaption class="rcap">EESC&#8211;USP &#183; S&#227;o Carlos &#183; Personal archive</figcaption>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============ THRESHOLD OUT ============ -->
+  <section class="thr thr--out">
+    <div class="thr__scan"></div>
+    <div class="thr__read"><span>MODE</span><b>INSTRUMENT &#9472;&#9472;&#9654; DAY</b></div>
+    <div class="thr__big">Back to the person.</div>
+    <div class="thr__hint">leaving the systems</div>
+  </section>
+
+  <!-- ============ 03 TRAJECTORY: trace waterfall ============ -->
+  <section class="path grid">
+    <div class="marker">03 / Trajectory</div>
+    <h2>Code, consequence and curiosity.</h2>
+    <p>Each chapter added a different kind of responsibility to the systems I build.</p>
+    <div class="wf">
+      <div class="wf__axis">
+        <span>span</span>
+        <div class="wf__ticks">
+          <span style="--x:0%">2021</span><span style="--x:16.2%">2022</span><span style="--x:32.4%">2023</span>
+          <span style="--x:48.6%">2024</span><span style="--x:64.9%">2025</span><span style="--x:81.1%">2026</span>
+          <span class="now" style="--x:90.5%">now</span><span style="--x:97.3%">2027</span>
+        </div>
+      </div>
+
+      <div class="wf__row">
+        <div class="wf__label"><b>UFSCar</b><i>Computer Science</i></div>
+        <div class="wf__lane"><div class="wf__span" style="--s: 0%; --w: 68.9%"><em>4 yr 4 mo</em></div></div>
+      </div>
+      <div class="wf__row">
+        <div class="wf__label"><span class="wf__nest"></span><b>UFSCar</b><i>Scientific Researcher</i></div>
+        <div class="wf__lane"><div class="wf__span" style="--s: 18.9%; --w: 16.2%"><em>1 yr 1 mo</em></div></div>
+      </div>
+      <div class="wf__row">
+        <div class="wf__label"><span class="wf__nest"></span><b>FAPESP</b><i>Scientific Researcher</i></div>
+        <div class="wf__lane"><div class="wf__span" style="--s: 35.1%; --w: 16.2%"><em>1 yr 1 mo</em></div></div>
+      </div>
+      <div class="wf__row">
+        <div class="wf__label"><span class="wf__nest"></span><b>iFood</b><i>Software Engineer Intern</i></div>
+        <div class="wf__lane"><div class="wf__span" style="--s: 51.4%; --w: 10.8%"><em>9 mo</em></div></div>
+      </div>
+      <div class="wf__row">
+        <div class="wf__label"><span class="wf__nest"></span><b>iFood</b><i>Software Engineer</i></div>
+        <div class="wf__lane"><div class="wf__span open" style="--s: 62.2%; --w: 28.4%"><em>1 yr 10 mo &#183; open</em></div></div>
+        <div class="wf__attrs">
+          <span><b>team slo</b>45.0 &#8594; 61.1</span>
+          <span><b>infra cost</b>&#8722;81%</span>
+          <span><b>core platforms</b>3, led end to end</span>
+        </div>
+      </div>
+      <div class="wf__row">
+        <div class="wf__label"><span class="wf__nest"></span><b>USP</b><i>M.Sc. Computer Science</i></div>
+        <div class="wf__lane">
+          <div class="wf__proj" style="--s: 90.5%; --w: 9.5%"></div>
+          <div class="wf__span open" style="--s: 67.6%; --w: 23%"><em>M.Sc. &#183; open</em></div>
+        </div>
+      </div>
+
+      <div class="wf__note">
+        <span>two spans open &#183; overlap is concurrency, not sequence</span>
+        <span>dashed tail = projected to Mar 2027</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 04 CONTACT ============ -->
+  <footer class="contact grid">
+    <div class="marker">04 / Next signal</div>
+    <h2>Let&#8217;s build what&#8217;s next.</h2>
+    <p>Have a difficult system, an international opportunity or an unusual idea? I would like to hear about it.</p>
+    <a class="cta" href="#"><span>Start a conversation</span><span>&#8599;&#xfe0e;</span></a>
+    <svg class="cvis" viewBox="0 0 420 340" fill="none" aria-hidden="true">
+      <path class="edge" d="M20 50 L200 170" stroke="currentColor" stroke-width="1" opacity=".45"/>
+      <path class="edge" d="M20 130 L200 170" stroke="currentColor" stroke-width="1" opacity=".45"/>
+      <path class="edge" d="M20 210 L200 170" stroke="currentColor" stroke-width="1" opacity=".45"/>
+      <path class="edge" d="M20 290 L200 170" stroke="currentColor" stroke-width="1" opacity=".45"/>
+      <path class="edge" d="M200 170 L400 170" stroke="#245bff" stroke-width="1.6"/>
+      <circle cx="200" cy="170" r="9" fill="#245bff"/>
+      <circle cx="200" cy="170" r="20" stroke="#245bff" stroke-width="1" opacity=".5"/>
+      <circle cx="200" cy="170" r="32" stroke="#245bff" stroke-width=".8" opacity=".25"/>
+      <circle cx="400" cy="170" r="5" fill="#245bff"/>
+    </svg>
+    <div class="cbottom">
+      <div><a href="#">LinkedIn &#8599;&#xfe0e;</a><a href="#">GitHub &#8599;&#xfe0e;</a><a href="#">Medium &#8599;&#xfe0e;</a></div>
+      <span>Brazil &#183; Americas &amp; European overlap</span>
+      <a href="#">Back to top &#8593;&#xfe0e;</a>
+    </div>
+  </footer>
+
+</div>
+</x-dc>
+<script data-dc-script data-props='{"reducedMotion":{"editor":"boolean","default":false,"section":"Motion"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { rm: this.props.reducedMotion ? "rm" : "" };
+  }
+}
+</script>
+</body>
+</html>

@@ -5,16 +5,8 @@ type HeaderReader = {
 };
 
 export function resolveSiteLocale(headers: HeaderReader): SiteLocale {
-  const country = headers.get("x-vercel-ip-country")?.toUpperCase();
-  if (country === "BR") return "pt-BR";
-
-  const preferredLanguage = headers
-    .get("accept-language")
-    ?.split(",", 1)[0]
-    ?.trim()
-    .toLowerCase();
-
-  return preferredLanguage === "pt-br" || preferredLanguage?.startsWith("pt-br-")
-    ? "pt-BR"
-    : "en";
+  // English is the portfolio's international default. Portuguese remains
+  // available through the explicit language control in the interface.
+  void headers;
+  return "en";
 }

@@ -1,0 +1,150 @@
+{
+  "pages": [
+    {
+      "id": "page-1",
+      "name": "Experience"
+    },
+    {
+      "id": "page-2",
+      "name": "Motion system"
+    },
+    {
+      "id": "page-3",
+      "name": "Mobile"
+    }
+  ],
+  "artboards": [
+    {
+      "file": "Main.dc.html",
+      "page": "page-1",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "The full journey",
+      "expand": "fill"
+    },
+    {
+      "file": "Threshold.dc.html",
+      "page": "page-1",
+      "x": 1540,
+      "y": 0,
+      "w": 1120,
+      "h": 760,
+      "title": "Inversion study",
+      "expand": "fill"
+    },
+    {
+      "file": "Trace.dc.html",
+      "page": "page-1",
+      "x": 2760,
+      "y": 0,
+      "w": 1240,
+      "h": 900,
+      "title": "Trace waterfall",
+      "expand": "fill"
+    },
+    {
+      "file": "Systems.dc.html",
+      "page": "page-1",
+      "x": 4100,
+      "y": 0,
+      "w": 1320,
+      "h": 900,
+      "title": "Case 01 state map",
+      "expand": "fill"
+    },
+    {
+      "file": "MotionSpec.dc.html",
+      "page": "page-2",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 1900,
+      "title": "Technique catalog"
+    },
+    {
+      "file": "Keyframes.dc.html",
+      "page": "page-2",
+      "x": 1540,
+      "y": 0,
+      "w": 1440,
+      "h": 1500,
+      "title": "Keyframe strips"
+    },
+    {
+      "file": "ReducedMotion.dc.html",
+      "page": "page-2",
+      "x": 3080,
+      "y": 0,
+      "w": 1360,
+      "h": 1720,
+      "title": "Reduced motion"
+    },
+    {
+      "file": "Tokens.dc.html",
+      "page": "page-2",
+      "x": 4540,
+      "y": 0,
+      "w": 1360,
+      "h": 2000,
+      "title": "Day / night tokens"
+    },
+    {
+      "file": "Mobile.dc.html",
+      "page": "page-3",
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "Phone journey",
+      "expand": "fill"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "how-to-read",
+      "page": "page-1",
+      "x": 0,
+      "y": -230,
+      "w": 620,
+      "text": "These four artboards actually scroll.\n\nExpand one (the arrows on its title bar) and scroll inside it — the animations are real CSS scroll-driven animation, not a mockup of motion. The inversion, the waterfall and the word-by-word reading highlight all run.\n\nStart with \"The full journey\"."
+    },
+    {
+      "id": "the-signature",
+      "page": "page-1",
+      "x": 1540,
+      "y": -230,
+      "w": 520,
+      "text": "The signature moment.\n\nThe page inverts to instrument mode where the systems live, and returns to daylight to talk to a person. Day → night → day.\n\nThe HUD in the corner reads --night live, in pure CSS — a counter fed by the registered property."
+    },
+    {
+      "id": "waterfall-note",
+      "page": "page-1",
+      "x": 2760,
+      "y": -230,
+      "w": 560,
+      "text": "Trajectory as a distributed trace.\n\nSix spans on a true month axis, Jan 2021 to Mar 2027, taken from your LinkedIn. Nesting is real: the UFSCar research role sits inside the degree, and the master's runs alongside the full-time role at iFood.\n\nYour numbers hang off the iFood span as attributes — team SLO 45.0 → 61.1, infra cost −81%, 3 core platforms — which is where a tracing UI puts them and where LinkedIn puts them.\n\nThe dashed tail on the M.Sc. is its projected end (Mar 2027), drawn as a projection."
+    },
+    {
+      "id": "motion-page-note",
+      "page": "page-2",
+      "x": 0,
+      "y": -200,
+      "w": 660,
+      "text": "The build-facing half.\n\nEvery technique with its timeline, its animation-range and the exact CSS — written to drop into app/globals.css. Plus the reduced-motion spec, which closes a real gap: there is no prefers-reduced-motion block in the project today."
+    },
+    {
+      "id": "mobile-note",
+      "page": "page-3",
+      "x": 470,
+      "y": 0,
+      "w": 460,
+      "text": "Phone width, 390×844.\n\nNo fake status bar and no fake keyboard — the real ones render on top.\n\nThe waterfall restacks: label and state on one line, the span lane below. All hit targets are 44px or larger."
+    }
+  ],
+  "launch": {
+    "view": "canvas",
+    "page": "page-1"
+  }
+}

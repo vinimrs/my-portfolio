@@ -37,3 +37,9 @@ yarn-error.log*
 # typescript
 next-env.d.ts
 /dist/
+
+# build artifacts
+tsconfig.tsbuildinfo
+
+# seeded design canvas (2.4MB, regenerable from design/*.dc.html)
+/design/follow-the-signal.html
