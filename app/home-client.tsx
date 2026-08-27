@@ -6,7 +6,7 @@ import type { SiteLocale } from "./i18n";
 
 type LocaleCopy = {
   skip: string;
-  nav: { work: string; path: string; contact: string; resume: string };
+  nav: { services: string; work: string; path: string; contact: string; resume: string };
   hero: {
     eyebrow: string;
     role: string;
@@ -17,7 +17,7 @@ type LocaleCopy = {
     availability: string;
     location: string;
   };
-  thesis: { marker: string; title: string; copy: string; principles: string[] };
+  services: { marker: string; title: string; copy: string; items: string[] };
   work: {
     marker: string;
     title: string;
@@ -32,9 +32,8 @@ type LocaleCopy = {
       context: string;
       decision: string;
       architecture: string;
-      outcome: string;
+      scope: string;
       tags: string[];
-      metric?: { value: string; label: string };
     }>;
   };
   research: {
@@ -49,7 +48,7 @@ type LocaleCopy = {
   path: {
     marker: string;
     title: string;
-    intro: string;
+    intro: string[];
     axisSpan: string;
     axisDuration: string;
     axisNow: string;
@@ -60,7 +59,6 @@ type LocaleCopy = {
       role: string;
       copy: string;
       duration: string;
-      attrs?: Array<{ k: string; v: string }>;
     }>;
   };
   threshold: {
@@ -71,82 +69,113 @@ type LocaleCopy = {
   footer: { marker: string; title: string; copy: string; action: string; location: string; back: string };
 };
 
+function durationSince(year: number, zeroBasedMonth: number, locale: SiteLocale) {
+  const today = new Date();
+  const totalMonths = Math.max(0, (today.getFullYear() - year) * 12 + today.getMonth() - zeroBasedMonth);
+  const years = Math.floor(totalMonths / 12);
+  const months = totalMonths % 12;
+
+  if (locale === "pt-BR") {
+    return [years ? `${years} a` : "", months ? `${months} m` : ""].filter(Boolean).join(" ");
+  }
+
+  return [years ? `${years} yr` : "", months ? `${months} mo` : ""].filter(Boolean).join(" ");
+}
+
 const copy: Record<SiteLocale, LocaleCopy> = {
   en: {
     skip: "Skip to the story",
-    nav: { work: "Systems", path: "Trajectory", contact: "Contact", resume: "Résumé" },
+    nav: { services: "Expertise", work: "Systems", path: "Trajectory", contact: "Contact", resume: "Résumé" },
     hero: {
-      eyebrow: "Software engineer · Creative technologist",
-      role: "SOFTWARE ENGINEER",
-      focus: "FINTECH · DISTRIBUTED SYSTEMS · RELIABILITY · ADAPTIVE SECURITY",
-      statement: "Systems, decisions, impact.",
-      intro: "I design the logic behind high-trust financial products—and turn distributed complexity into experiences people can rely on.",
-      explore: "Follow the signal",
-      availability: "Building fintech at iFood · Researching adaptive security at USP",
-      location: "Maceió, Brazil",
+      eyebrow: "Software engineering · Full-stack systems & applied AI",
+      role: "FULL-STACK SOFTWARE ENGINEER",
+      focus: "FULL-STACK ENGINEERING · DISTRIBUTED SYSTEMS · APPLIED AI · RELIABILITY",
+      statement: "I build and evolve software systems under real production constraints.",
+      intro: "My work spans full-stack product engineering, software architecture, web platforms, distributed flows, legacy modernization, and AI-assisted developer tooling that must remain understandable and reliable in production. I am open to remote and international projects.",
+      explore: "Discuss a project",
+      availability: `${durationSince(2024, 2, "en")} at iFood · M.Sc. candidate in Computer Science at USP`,
+      location: "São Carlos, Brazil · Open to remote and international projects",
     },
-    thesis: {
-      marker: "00 / Operating principle",
-      title: "Reliability is a creative medium.",
-      copy: "The best systems do not expose their complexity. They transform it into confidence: one clear state, one explainable decision, one experience that earns trust.",
-      principles: ["Make complexity legible", "Design for failure before it arrives", "Turn constraints into leverage"],
+    services: {
+      marker: "00 / Engineering approach",
+      title: "Engineering that leads to clear technical decisions.",
+      copy: "I work across user-facing products, internal platforms, and critical distributed systems where architecture and production trade-offs need to be explicit. My approach connects product context, system design, and implementation.",
+      items: [
+        "Full-stack product engineering and system design",
+        "Software architecture, modernization, and integration",
+        "Reliability and production readiness",
+        "AI-assisted developer tooling and workflow automation",
+      ],
     },
     work: {
       marker: "01 / Selected systems",
-      title: "Engineering stories, told through decisions.",
-      intro: "Three chapters across financial infrastructure, platform engineering and adaptive security. Each begins with tension and ends with a system that behaves more clearly.",
-      confidentiality: "Product narratives are intentionally generalized to respect confidentiality.",
-      labels: ["Context", "Decision", "Architecture", "Outcome"],
+      title: "Real problems, technical decisions, and production outcomes.",
+      intro: "Four examples of systems I have worked on directly, from architectural design to rollout and observability.",
+      confidentiality: "Some details are intentionally generalized to protect product confidentiality.",
+      labels: ["Problem", "Direction", "System", "Scope"],
       cases: [
         {
           number: "01",
-          chapter: "Money in motion",
+          chapter: "Pix key lifecycle",
           field: "Fintech · Distributed systems",
-          title: "Pix keys, without the uncertainty.",
-          context: "A payment key looks simple. Behind it live ownership, claims, asynchronous events and reconciliation across multiple boundaries.",
-          decision: "Model consistency as a visible journey—not as the illusion of one synchronous request.",
-          architecture: "Event-driven state transitions, idempotent consumers and reconciliation paths keep every participant aligned.",
-          outcome: "Clear states across an asynchronous journey, with failure designed as part of the product—not hidden beneath it.",
+          title: "The asynchronous lifecycle of Pix keys",
+          context: "Ownership claims, provider webhooks, and local records had to remain coherent across an asynchronous journey with multiple failure modes.",
+          decision: "Treat consistency as an explicit lifecycle, with idempotency and reconciliation instead of relying on the illusion of one synchronous request.",
+          architecture: "Event-driven state transitions, idempotent consumers, and recovery paths aligned local and external state while keeping each step observable.",
+          scope: "Led the backend work from architectural design and data modeling through integrations, infrastructure, rollout, and production observability.",
           tags: ["Go", "Kotlin", "CQRS", "PostgreSQL", "SQS", "Kubernetes"],
-          metric: { value: "1 of 3", label: "core platforms led end to end at iFood" },
         },
         {
           number: "02",
-          chapter: "Trust at scale",
+          chapter: "Shared capability",
           field: "Platform engineering",
-          title: "Audit became a product capability.",
-          context: "Compliance data was essential, but every team solving it independently multiplied friction, gaps and maintenance cost.",
-          decision: "Create one reusable foundation that made the correct path the easiest path for product teams.",
-          architecture: "A normalized event contract, shared capture layer and observable pipeline separated policy from product code.",
-          outcome: "Shared traceability with lower adoption cost—and a platform capability that improved as more teams used it.",
+          title: "Audit as a shared capability",
+          context: "Audit records were essential, but repeated service-level implementations multiplied code, inconsistencies, and maintenance cost.",
+          decision: "Create and maintain the team’s first shared library so services could adopt one contract without rebuilding the same capability.",
+          architecture: "A common audit contract and reusable capture layer separated the shared rules from each product flow while preserving observability.",
+          scope: "Created and maintained the team’s first shared library, reducing duplicated implementation and making a common contract easier for services to adopt.",
           tags: ["Go", "Kafka", "DDD", "Observability"],
         },
         {
           number: "03",
-          chapter: "Systems with instincts",
-          field: "Research · Cybersecurity",
-          title: "What if software noticed danger first?",
-          context: "Microservices scale quickly. Their attack surface and operational uncertainty grow just as fast.",
-          decision: "Connect detection, prevention and recovery in one continuous adaptive feedback loop.",
-          architecture: "MAPE-K coordinates monitoring, analysis, planning and execution around a shared model of system knowledge.",
-          outcome: "A research direction toward software that can move from reacting to threats to anticipating them.",
-          tags: ["MAPE-K", "Microservices", "Security", "AI"],
+          chapter: "Controlled change",
+          field: "Legacy modernization · Integration",
+          title: "Modernizing without moving the risk",
+          context: "Legacy flows carried production knowledge and business risk that could not simply be moved into a new service all at once.",
+          decision: "Separate responsibilities and migrate gradually, making compatibility, observability, and recovery part of the modernization plan.",
+          architecture: "API- and event-based boundaries reduced coupling while parallel paths and operational signals supported a controlled transition.",
+          scope: "Worked directly on evolving legacy flows while keeping gradual migration, observability, and recovery as explicit parts of the change.",
+          tags: ["APIs", "Events", "Migration", "Observability", "Recovery"],
+        },
+        {
+          number: "04",
+          chapter: "AI-assisted decommissioning",
+          field: "Developer tooling · Applied AI",
+          title: "Turning service decommissioning into a guided system",
+          context: "Decommissioning a service was a long and delicate process spread across manual checks and multiple internal systems, making dependencies, risks, and required steps difficult to see.",
+          decision: "Replace the fragmented checklist with an AI-assisted workflow that gathers context before proposing action while keeping engineers in control of the final decisions.",
+          architecture: "Model Context Protocol (MCP) servers connected the tool to internal platforms, aggregating service ownership, dependencies, runtime signals, and operational context into a unified view.",
+          scope: "Developed the internal tool and guided flow that turns cross-system discovery into an actionable decommissioning plan that is easier to understand and execute.",
+          tags: ["Artificial Intelligence", "Model Context Protocol (MCP)", "MCP servers", "Developer tooling", "Workflow automation", "Service decommissioning"],
         },
       ],
     },
     research: {
-      marker: "02 / Current research",
-      title: "Can software develop instincts?",
-      copy: "At USP, I research self-adaptive security for microservices: systems that can detect, prevent and recover from threats with increasing autonomy.",
-      thesis: "From software that reacts to software that anticipates.",
-      tags: ["Self-protection", "Self-healing", "Microservice security"],
-      imageAlt: "Entrance to the EESC–USP campus in São Carlos, where Vinícius develops his master's research",
-      imageCaption: "EESC–USP · São Carlos · Personal archive",
+      marker: "02 / Research & technical authority",
+      title: "Research that sharpens how I design production systems.",
+      copy: "At USP, I investigate how microservices can detect attacks, adapt their behavior, and recover with less human intervention. The work connects self-protection, self-healing, MAPE-K, and distributed-system security.",
+      thesis: "This research informs how I approach observability, feedback loops, safe automation, and recovery in production.",
+      tags: ["Architecture paper accepted at AISecDev 2026", "Experiment in progress"],
+      imageAlt: "Entrance to the EESC-USP campus in São Carlos, where Vinícius develops his master's research",
+      imageCaption: "EESC-USP · São Carlos · Personal archive",
     },
     path: {
       marker: "03 / Trajectory",
-      title: "Code, consequence and curiosity.",
-      intro: "Each chapter added a different kind of responsibility to the systems I build. Two spans are still open.",
+      title: "From research to production—and back to research.",
+      intro: [
+        "My path began in São Carlos, building systems for mental-health research at UFSCar and later continuing that work with FAPESP funding. I then brought that foundation in architecture and delivery into financial products at iFood.",
+        "Today, also based in São Carlos, I combine production engineering with my master’s research at USP. They are different paths guided by the same question: how do we keep software reliable as complexity grows?",
+      ],
       axisSpan: "span",
       axisDuration: "duration",
       axisNow: "now",
@@ -157,13 +186,8 @@ const copy: Record<SiteLocale, LocaleCopy> = {
         { range: "Mar 2023 — Mar 2024", place: "FAPESP", role: "Scientific Researcher", duration: "1 yr 1 mo", copy: "The same rehabilitation platform under FAPESP funding: system architecture, best practices and CI/CD provisioning." },
         { range: "Mar 2024 — Nov 2024", place: "iFood", role: "Software Engineer Intern", duration: "9 mo", copy: "Back-office for iFood Pago, the team's first shared library, and an AI-integrated backend built at the internal hackathon." },
         {
-          range: "Nov 2024 — present", place: "iFood", role: "Software Engineer", duration: "1 yr 10 mo",
-          copy: "Financial products, backend architecture and production reliability across Pix, transfers and banking journeys.",
-          attrs: [
-            { k: "team slo", v: "45.0 → 61.1" },
-            { k: "infra cost", v: "−81%" },
-            { k: "core platforms", v: "3, led end to end" },
-          ],
+          range: "Nov 2024 — present", place: "iFood", role: "Software Engineer", duration: `${durationSince(2024, 10, "en")} · ${durationSince(2024, 2, "en")} at iFood`,
+          copy: "Financial products, full-stack engineering, distributed systems, production reliability, and AI-assisted internal tooling across Pix, transfers, and banking journeys.",
         },
         { range: "Mar 2025 — present", place: "USP", role: "M.Sc. Computer Science", duration: "1 yr 5 mo", copy: "Self-adaptive security for microservices and the question of how software can defend itself." },
       ],
@@ -173,115 +197,128 @@ const copy: Record<SiteLocale, LocaleCopy> = {
       leave: { mode: "Instrument ──▶ Day", title: "Back to the person.", hint: "leaving the systems" },
     },
     writing: {
-      marker: "Featured field note",
+      marker: "Technical writing",
       title: "Is Clean Architecture always a good idea?",
       copy: "A practical argument about boundaries, abstractions and the moment architectural discipline becomes accidental complexity.",
       action: "Read on Medium",
       footnote: "Spring Boot · Clean Architecture · Trade-offs",
     },
     footer: {
-      marker: "04 / Next signal",
-      title: "Let’s build what’s next.",
-      copy: "Have a difficult system, an international opportunity or an unusual idea? I would like to hear about it.",
-      action: "Start a conversation",
-      location: "Brazil · Americas & European overlap",
+      marker: "04 / Remote & international projects",
+      title: "Working on a difficult software or AI system?",
+      copy: "I am open to remote and international projects involving full-stack product engineering, software architecture, distributed systems, legacy modernization, applied AI, or production reliability. If the work is a good fit, I would like to hear about the system and the team behind it.",
+      action: "Discuss a project",
+      location: "São Carlos, Brazil · Open to remote collaboration",
       back: "Back to top",
     },
   },
   "pt-BR": {
     skip: "Ir para a história",
-    nav: { work: "Sistemas", path: "Trajetória", contact: "Contato", resume: "Currículo" },
+    nav: { services: "Atuação", work: "Sistemas", path: "Trajetória", contact: "Contato", resume: "Currículo" },
     hero: {
-      eyebrow: "Engenheiro de software · Tecnólogo criativo",
-      role: "ENGENHEIRO DE SOFTWARE",
-      focus: "FINTECH · SISTEMAS DISTRIBUÍDOS · CONFIABILIDADE · SEGURANÇA ADAPTATIVA",
-      statement: "Sistemas, decisões, impacto.",
-      intro: "Projeto a lógica por trás de produtos financeiros de alta confiança—e transformo complexidade distribuída em experiências nas quais as pessoas podem confiar.",
-      explore: "Seguir o sinal",
-      availability: "Construindo fintech no iFood · Pesquisando segurança adaptativa na USP",
-      location: "Maceió, Brasil",
+      eyebrow: "Engenharia de software · Sistemas full-stack e AI aplicada",
+      role: "ENGENHEIRO DE SOFTWARE FULL-STACK",
+      focus: "ENGENHARIA FULL-STACK · SISTEMAS DISTRIBUÍDOS · AI APLICADA · CONFIABILIDADE",
+      statement: "Construo e evoluo sistemas de software sob restrições reais de produção.",
+      intro: "Minha atuação envolve engenharia de produto full-stack, arquitetura de software, plataformas web, fluxos distribuídos, modernização de sistemas legados e ferramentas internas apoiadas por AI que precisam permanecer compreensíveis e confiáveis em produção. Estou aberto a projetos remotos e internacionais.",
+      explore: "Conversar sobre um projeto",
+      availability: `${durationSince(2024, 2, "pt-BR")} no iFood · Mestrando em Ciência da Computação na USP`,
+      location: "São Carlos, Brasil · Aberto a projetos remotos e internacionais",
     },
-    thesis: {
-      marker: "00 / Princípio de operação",
-      title: "Confiabilidade é matéria-prima criativa.",
-      copy: "Os melhores sistemas não exibem sua complexidade. Eles a transformam em confiança: um estado claro, uma decisão explicável, uma experiência que merece ser usada.",
-      principles: ["Tornar a complexidade legível", "Projetar a falha antes que ela aconteça", "Transformar restrições em alavancagem"],
+    services: {
+      marker: "00 / Como atuo",
+      title: "Engenharia que leva a decisões técnicas claras.",
+      copy: "Atuo em produtos digitais, plataformas internas e sistemas distribuídos críticos nos quais arquitetura e decisões de produção precisam ser explícitas. Meu trabalho conecta contexto de produto, desenho de sistemas e implementação.",
+      items: [
+        "Engenharia de produto full-stack e desenho de sistemas",
+        "Arquitetura de software, modernização e integração",
+        "Confiabilidade e prontidão para produção",
+        "Ferramentas internas e automação de fluxos com AI",
+      ],
     },
     work: {
       marker: "01 / Sistemas selecionados",
-      title: "Histórias de engenharia contadas por decisões.",
-      intro: "Três capítulos entre infraestrutura financeira, engenharia de plataforma e segurança adaptativa. Cada um começa com tensão e termina em um sistema que se comporta de forma mais clara.",
-      confidentiality: "Narrativas intencionalmente generalizadas para preservar a confidencialidade dos produtos.",
-      labels: ["Contexto", "Decisão", "Arquitetura", "Resultado"],
+      title: "Problemas reais, decisões técnicas e resultados em produção.",
+      intro: "Quatro exemplos de sistemas nos quais atuei diretamente, da definição arquitetural ao rollout e à observabilidade.",
+      confidentiality: "Alguns detalhes foram generalizados para preservar a confidencialidade dos produtos.",
+      labels: ["Problema", "Direcionamento", "Sistema", "Atuação"],
       cases: [
         {
           number: "01",
-          chapter: "Dinheiro em movimento",
+          chapter: "Ciclo de vida Pix",
           field: "Fintech · Sistemas distribuídos",
-          title: "Chaves Pix, sem a incerteza.",
-          context: "Uma chave parece simples. Por trás dela existem titularidade, reivindicações, eventos assíncronos e conciliação entre múltiplas fronteiras.",
-          decision: "Modelar consistência como uma jornada visível—não como a ilusão de uma única requisição síncrona.",
-          architecture: "Transições orientadas a eventos, consumidores idempotentes e fluxos de conciliação mantêm cada participante alinhado.",
-          outcome: "Estados claros em uma jornada assíncrona, com a falha projetada como parte do produto—não escondida sob ele.",
+          title: "O ciclo assíncrono das chaves Pix",
+          context: "Reivindicações de titularidade, webhooks de provedores e registros locais precisavam permanecer coerentes em uma jornada assíncrona com diferentes modos de falha.",
+          decision: "Tratar a consistência como um ciclo de vida explícito, com idempotência e reconciliação no lugar da ilusão de uma única requisição síncrona.",
+          architecture: "Transições orientadas a eventos, consumidores idempotentes e caminhos de recuperação alinharam estados locais e externos mantendo cada etapa observável.",
+          scope: "Liderei o trabalho backend da definição arquitetural e modelagem de dados às integrações, infraestrutura, rollout e observabilidade em produção.",
           tags: ["Go", "Kotlin", "CQRS", "PostgreSQL", "SQS", "Kubernetes"],
-          metric: { value: "1 de 3", label: "plataformas core, ponta a ponta no iFood" },
         },
         {
           number: "02",
-          chapter: "Confiança em escala",
+          chapter: "Capacidade compartilhada",
           field: "Engenharia de plataforma",
-          title: "Auditoria virou capacidade de produto.",
-          context: "Dados de conformidade eram essenciais, mas cada time resolvendo sozinho multiplicava atrito, lacunas e custo de manutenção.",
-          decision: "Criar uma base reutilizável que tornasse o caminho correto também o caminho mais fácil.",
-          architecture: "Um contrato de eventos normalizado, uma camada de captura compartilhada e um pipeline observável separaram política do código de produto.",
-          outcome: "Rastreabilidade compartilhada com menor custo de adoção—e uma plataforma que melhorava quanto mais times a utilizavam.",
+          title: "Auditoria como capacidade compartilhada",
+          context: "Registros de auditoria eram essenciais, mas implementações repetidas em cada serviço multiplicavam código, inconsistências e custo de manutenção.",
+          decision: "Criar e manter a primeira biblioteca compartilhada do time para que os serviços adotassem um contrato comum sem reconstruir a mesma capacidade.",
+          architecture: "Um contrato comum de auditoria e uma camada reutilizável de captura separaram as regras compartilhadas de cada fluxo de produto, preservando a observabilidade.",
+          scope: "Criei e mantive a primeira biblioteca compartilhada do time, reduzindo implementações duplicadas e facilitando a adoção de um contrato comum entre serviços.",
           tags: ["Go", "Kafka", "DDD", "Observabilidade"],
         },
         {
           number: "03",
-          chapter: "Sistemas com instinto",
-          field: "Pesquisa · Cibersegurança",
-          title: "E se o software percebesse o perigo primeiro?",
-          context: "Microsserviços escalam rápido. Sua superfície de ataque e sua incerteza operacional crescem na mesma velocidade.",
-          decision: "Conectar detecção, prevenção e recuperação em um ciclo adaptativo contínuo.",
-          architecture: "MAPE-K coordena monitoramento, análise, planejamento e execução em torno de um modelo compartilhado de conhecimento.",
-          outcome: "Uma direção de pesquisa rumo a software capaz de passar da reação à antecipação de ameaças.",
-          tags: ["MAPE-K", "Microsserviços", "Segurança", "IA"],
+          chapter: "Mudança controlada",
+          field: "Modernização de legado · Integração",
+          title: "Modernização sem transferir o risco",
+          context: "Fluxos legados carregavam conhecimento de produção e risco de negócio que não podiam simplesmente ser movidos de uma vez para um novo serviço.",
+          decision: "Separar responsabilidades e migrar de forma gradual, tornando compatibilidade, observabilidade e recuperação partes do plano de modernização.",
+          architecture: "Fronteiras baseadas em APIs e eventos reduziram acoplamento enquanto caminhos paralelos e sinais operacionais sustentaram uma transição controlada.",
+          scope: "Atuei diretamente na evolução dos fluxos legados, mantendo migração gradual, observabilidade e recuperação como partes explícitas da mudança.",
+          tags: ["APIs", "Eventos", "Migração", "Observabilidade", "Recuperação"],
+        },
+        {
+          number: "04",
+          chapter: "Descomissionamento com AI",
+          field: "Ferramentas internas · AI aplicada",
+          title: "Transformando o descomissionamento de serviços em um fluxo guiado",
+          context: "Descomissionar um serviço era um processo longo e delicado, distribuído entre verificações manuais e diferentes sistemas internos. Dependências, riscos e etapas necessárias eram difíceis de visualizar em conjunto.",
+          decision: "Substituir o checklist fragmentado por um fluxo apoiado por AI, capaz de reunir contexto antes de propor ações e mantendo as decisões finais sob controle dos engenheiros.",
+          architecture: "Servidores Model Context Protocol (MCP) conectaram a ferramenta às plataformas internas, reunindo propriedade dos serviços, dependências, sinais de execução e contexto operacional em uma visão unificada.",
+          scope: "Desenvolvi a ferramenta interna e o fluxo guiado que transforma a descoberta entre sistemas em um plano de descomissionamento acionável, mais simples de compreender e executar.",
+          tags: ["Artificial Intelligence", "Model Context Protocol (MCP)", "Servidores MCP", "Ferramentas internas", "Automação de fluxos", "Descomissionamento de serviços"],
         },
       ],
     },
     research: {
-      marker: "02 / Pesquisa atual",
-      title: "Software pode desenvolver instintos?",
-      copy: "Na USP, pesquiso segurança autoadaptativa para microsserviços: sistemas capazes de detectar, prevenir e se recuperar de ameaças com autonomia crescente.",
-      thesis: "Do software que reage ao software que antecipa.",
-      tags: ["Autoproteção", "Autorrecuperação", "Segurança de microsserviços"],
-      imageAlt: "Entrada da EESC–USP em São Carlos, onde Vinícius desenvolve sua pesquisa de mestrado",
-      imageCaption: "EESC–USP · São Carlos · Arquivo pessoal",
+      marker: "02 / Pesquisa e autoridade técnica",
+      title: "Pesquisa que influencia a forma como projeto sistemas em produção.",
+      copy: "Na USP, investigo como microsserviços podem detectar ataques, adaptar seu comportamento e se recuperar com menor intervenção humana. O trabalho conecta autoproteção, autorrecuperação, MAPE-K e segurança de arquiteturas distribuídas.",
+      thesis: "Essa pesquisa fortalece minha atuação prática em observabilidade, ciclos de feedback, automação segura e estratégias de recuperação.",
+      tags: ["Artigo sobre a arquitetura aceito no AISecDev 2026", "Experimento em andamento"],
+      imageAlt: "Entrada da EESC-USP em São Carlos, onde Vinícius desenvolve sua pesquisa de mestrado",
+      imageCaption: "EESC-USP · São Carlos · Arquivo pessoal",
     },
     path: {
       marker: "03 / Trajetória",
-      title: "Código, consequência e curiosidade.",
-      intro: "Cada capítulo adicionou um tipo diferente de responsabilidade aos sistemas que construo. Dois spans seguem abertos.",
+      title: "Da pesquisa à produção e de volta à pesquisa.",
+      intro: [
+        "Minha trajetória começou em São Carlos, com o desenvolvimento de sistemas para pesquisas em saúde mental na UFSCar e com um projeto financiado pela FAPESP. Depois, levei essa base de arquitetura e entrega para produtos financeiros no iFood.",
+        "Hoje, também em São Carlos, concilio a construção de sistemas financeiros em produção com a pesquisa de mestrado na USP. São duas frentes diferentes, mas orientadas pela mesma pergunta: como construir software que continue confiável quando a complexidade aumenta?",
+      ],
       axisSpan: "span",
       axisDuration: "duração",
       axisNow: "agora",
       legend: ["Recuo = aninhado no span acima · sobreposição é concorrência, não sequência", "Cauda tracejada = projeção até mar 2027"],
       entries: [
-        { range: "Jan 2021 — Abr 2025", place: "UFSCar", role: "Ciência da Computação", duration: "4 a 4 m", copy: "Algoritmos, pensamento sistêmico e um interesse duradouro por perguntas difíceis." },
-        { range: "Mar 2022 — Mar 2023", place: "UFSCar", role: "Pesquisador Científico", duration: "1 a 1 m", copy: "Arquitetura web para pesquisa em reabilitação de saúde mental e uso de substâncias — Next.js, TypeScript, CI/CD." },
-        { range: "Mar 2023 — Mar 2024", place: "FAPESP", role: "Pesquisador Científico", duration: "1 a 1 m", copy: "A mesma plataforma de reabilitação sob financiamento FAPESP: arquitetura do sistema, boas práticas e provisionamento com CI/CD." },
-        { range: "Mar 2024 — Nov 2024", place: "iFood", role: "Engenheiro de Software (estágio)", duration: "9 m", copy: "Back-office do iFood Pago, a primeira biblioteca compartilhada do time e um backend integrado a IA no hackathon interno." },
+        { range: "Jan 2021 a abr 2025", place: "UFSCar", role: "Ciência da Computação", duration: "4 a 4 m", copy: "Algoritmos, pensamento sistêmico e um interesse duradouro por perguntas difíceis." },
+        { range: "Mar 2022 a mar 2023", place: "UFSCar", role: "Pesquisador Científico", duration: "1 a 1 m", copy: "Arquitetura web para pesquisa em reabilitação de saúde mental e uso de substâncias, com Next.js, TypeScript e CI/CD." },
+        { range: "Mar 2023 a mar 2024", place: "FAPESP", role: "Pesquisador Científico", duration: "1 a 1 m", copy: "A mesma plataforma de reabilitação sob financiamento FAPESP, com foco em arquitetura do sistema, boas práticas e provisionamento com CI/CD." },
+        { range: "Mar 2024 a nov 2024", place: "iFood", role: "Engenheiro de Software (estágio)", duration: "9 m", copy: "Back-office do iFood Pago, a primeira biblioteca compartilhada do time e um backend integrado a IA no hackathon interno." },
         {
-          range: "Nov 2024 — presente", place: "iFood", role: "Engenheiro de Software", duration: "1 a 10 m",
-          copy: "Produtos financeiros, arquitetura backend e confiabilidade em produção nas jornadas de Pix, transferências e banking.",
-          attrs: [
-            { k: "slo do time", v: "45,0 → 61,1" },
-            { k: "custo de infra", v: "−81%" },
-            { k: "plataformas core", v: "3, ponta a ponta" },
-          ],
+          range: "Desde nov 2024", place: "iFood", role: "Engenheiro de Software", duration: `${durationSince(2024, 10, "pt-BR")} · ${durationSince(2024, 2, "pt-BR")} no iFood`,
+          copy: "Produtos financeiros, engenharia full-stack, sistemas distribuídos, confiabilidade em produção e ferramentas internas apoiadas por AI nas jornadas de Pix, transferências e banking.",
         },
-        { range: "Mar 2025 — presente", place: "USP", role: "Mestrado em Ciência da Computação", duration: "1 a 5 m", copy: "Segurança autoadaptativa para microsserviços e a pergunta de como o software pode se defender." },
+        { range: "Desde mar 2025", place: "USP", role: "Mestrado em Ciência da Computação", duration: "1 a 5 m", copy: "Segurança autoadaptativa para microsserviços e a pergunta de como o software pode se defender." },
       ],
     },
     threshold: {
@@ -289,18 +326,18 @@ const copy: Record<SiteLocale, LocaleCopy> = {
       leave: { mode: "Instrumento ──▶ Dia", title: "De volta à pessoa.", hint: "saindo dos sistemas" },
     },
     writing: {
-      marker: "Artigo em destaque",
+      marker: "Escrita técnica",
       title: "Clean Architecture é sempre uma boa ideia?",
       copy: "Um argumento prático sobre limites, abstrações e o momento em que disciplina arquitetural se transforma em complexidade acidental.",
       action: "Ler no Medium",
       footnote: "Spring Boot · Clean Architecture · Trade-offs",
     },
     footer: {
-      marker: "04 / Próximo sinal",
-      title: "Vamos construir o que vem depois.",
-      copy: "Tem um sistema difícil, uma oportunidade internacional ou uma ideia incomum? Quero conhecê-la.",
-      action: "Iniciar uma conversa",
-      location: "Brasil · Américas e Europa",
+      marker: "04 / Projetos remotos e internacionais",
+      title: "Trabalhando em um sistema de software ou AI desafiador?",
+      copy: "Estou aberto a projetos remotos e internacionais em engenharia de produto full-stack, arquitetura de software, sistemas distribuídos, modernização de legado, AI aplicada ou confiabilidade em produção. Se houver alinhamento, quero conhecer o sistema e o time por trás dele.",
+      action: "Conversar sobre um projeto",
+      location: "São Carlos, Brasil · Colaboração remota",
       back: "Voltar ao topo",
     },
   },
@@ -333,6 +370,9 @@ const pathAxis: Array<{ at: number; label?: string; now?: boolean }> = [
   { at: 90.5, now: true },
   { at: 97.3, label: "2027" },
 ];
+
+const contactHref =
+  "mailto:viniciusromualdobusiness@gmail.com?subject=Project%20inquiry%3A%20project%20name";
 
 function Arrow({ direction = "ne" }: { direction?: "ne" | "down" | "up" }) {
   return <span aria-hidden="true">{direction === "down" ? "↓" : direction === "up" ? "↑" : "↗"}&#xfe0e;</span>;
@@ -413,8 +453,9 @@ function CaseDiagram({ index }: { index: number }) {
     );
   }
 
-  return (
-    <svg className="case-diagram" viewBox="0 0 620 480" aria-hidden="true">
+  if (index === 2) {
+    return (
+      <svg className="case-diagram" viewBox="0 0 620 480" aria-hidden="true">
       <g className="diagram-layer layer-context">
         <circle cx="126" cy="238" r="96" className="diagram-orbit" /><path className="diagram-path" d="M126 142V334M30 238H222" />
         <circle cx="126" cy="238" r="9" /><circle cx="126" cy="170" r="6" /><circle cx="194" cy="238" r="6" /><circle cx="126" cy="306" r="6" /><circle cx="58" cy="238" r="6" />
@@ -431,6 +472,36 @@ function CaseDiagram({ index }: { index: number }) {
         <circle cx="566" cy="238" r="42" /><circle cx="566" cy="238" r="68" /><path className="diagram-path" d="M566 170A68 68 0 1 1 500 222" />
       </g>
       <circle className="diagram-pulse" data-end-x="566" cx="126" cy="238" r="11" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg className="case-diagram" viewBox="0 0 620 480" aria-hidden="true">
+      <g className="diagram-layer layer-context">
+        <path className="diagram-path" d="M58 104H164M58 194H164M58 284H164M58 374H164" />
+        <rect x="34" y="80" width="48" height="48" rx="6" />
+        <circle cx="58" cy="194" r="24" />
+        <rect x="34" y="260" width="48" height="48" rx="24" />
+        <rect x="34" y="350" width="48" height="48" rx="6" />
+      </g>
+      <g className="diagram-layer layer-decision">
+        <rect x="164" y="154" width="112" height="172" rx="8" />
+        <path className="diagram-path" d="M192 190H248M192 224H248M192 258H248M192 292H232" />
+        <circle cx="220" cy="120" r="9" /><path className="diagram-path" d="M220 129V154" />
+      </g>
+      <g className="diagram-layer layer-architecture">
+        <path className="diagram-path" d="M276 240H342M342 240C366 240 366 154 402 154M342 240H420M342 240C366 240 366 326 402 326" />
+        <circle cx="342" cy="240" r="11" /><circle cx="420" cy="240" r="42" className="diagram-orbit" /><circle cx="420" cy="240" r="12" />
+        <circle cx="402" cy="154" r="7" /><circle cx="402" cy="326" r="7" />
+      </g>
+      <g className="diagram-layer layer-outcome">
+        <path className="diagram-path" d="M462 240H500" />
+        <rect x="500" y="142" width="88" height="196" rx="8" />
+        <path className="diagram-path" d="M520 182H568M520 220H568M520 258H568M520 296H552" />
+        <circle cx="510" cy="182" r="4" /><circle cx="510" cy="220" r="4" /><circle cx="510" cy="258" r="4" /><circle cx="510" cy="296" r="4" />
+      </g>
+      <circle className="diagram-pulse" data-end-x="588" cx="58" cy="104" r="11" />
     </svg>
   );
 }
@@ -444,7 +515,7 @@ export default function HomeClient({ locale: initialLocale }: { locale: SiteLoca
 
   useEffect(() => {
     document.documentElement.lang = locale;
-    const updateTime = () => setTime(new Intl.DateTimeFormat(locale, { timeZone: "America/Maceio", hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date()));
+    const updateTime = () => setTime(new Intl.DateTimeFormat(locale, { timeZone: "America/Sao_Paulo", hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date()));
     updateTime();
     const interval = window.setInterval(updateTime, 30_000);
     return () => window.clearInterval(interval);
@@ -614,7 +685,7 @@ export default function HomeClient({ locale: initialLocale }: { locale: SiteLoca
 
   const chapters = [
     ["top", locale === "pt-BR" ? "Início" : "Index"],
-    ["principle", locale === "pt-BR" ? "Princípio" : "Principle"],
+    ["services", locale === "pt-BR" ? "Como posso ajudar" : "How I can help"],
     ["work", t.nav.work],
     ["research", locale === "pt-BR" ? "Pesquisa" : "Research"],
     ["path", t.nav.path],
@@ -623,7 +694,7 @@ export default function HomeClient({ locale: initialLocale }: { locale: SiteLoca
 
   return (
     <main ref={root}>
-      <a className="skip-link" href="#principle">{t.skip}</a>
+      <a className="skip-link" href="#services">{t.skip}</a>
       <div className="story-progress" aria-hidden="true">
         <span className="story-progress__fill" />
         <span className="story-progress__echo story-progress__echo--3" />
@@ -637,15 +708,15 @@ export default function HomeClient({ locale: initialLocale }: { locale: SiteLoca
         <a className="brand" href="#top" aria-label="Vinícius Romualdo, home"><span>VR</span><i>®</i></a>
         <div className="wordmark">Vinícius Romualdo</div>
         <nav aria-label={locale === "pt-BR" ? "Navegação principal" : "Main navigation"}>
+          <a href="#services">{t.nav.services}</a>
           <a href="#work">{t.nav.work}</a>
-          <a href="#research">{locale === "pt-BR" ? "Pesquisa" : "Research"}</a>
-          <a href="#path">{t.nav.path}</a>
+          <a href="#contact">{t.nav.contact}</a>
         </nav>
         <div className="header-actions">
           <button className="locale-toggle" type="button" onClick={() => setLocale(locale === "en" ? "pt-BR" : "en")} aria-label={locale === "en" ? "Mudar idioma para português" : "Switch language to English"}>
             <span className={locale === "en" ? "is-active" : ""}>EN</span><i>/</i><span className={locale === "pt-BR" ? "is-active" : ""}>PT</span>
           </button>
-          <a className="resume-link" href="/vinicius-romualdo-resume.pdf" target="_blank" rel="noreferrer">{t.nav.resume} <Arrow /></a>
+          <a className="resume-link" href="/vinicius-romualdo-resume.pdf" target="_blank" rel="noreferrer" type="application/pdf" aria-label={`${t.nav.resume} (PDF)`}>{t.nav.resume} <Arrow /></a>
         </div>
       </header>
 
@@ -664,29 +735,29 @@ export default function HomeClient({ locale: initialLocale }: { locale: SiteLoca
           <span>{t.hero.eyebrow}</span>
           <span>{t.hero.location} · {time} BRT</span>
         </div>
-        <div className="hero-name">
+        <h1 className="hero-name">
           <div className="hero-line"><span className="hero-word">Vinícius</span></div>
           <div className="hero-line"><span className="hero-word">Romualdo</span></div>
           <span className="hero-role">{t.hero.role}</span>
-        </div>
+        </h1>
         <div className="hero-visual"><HeroTopology /></div>
         <p className="hero-focus">{t.hero.focus}</p>
         <div className="hero-intro">
           <strong>{t.hero.statement}</strong>
           <p>{t.hero.intro}</p>
-          <a href="#principle">{t.hero.explore}<Arrow direction="down" /></a>
+          <a href="#contact">{t.hero.explore}<Arrow /></a>
         </div>
         <div className="hero-status"><i /><span>{t.hero.availability}</span></div>
       </section>
 
-      <section className="principle chapter page-grid" id="principle" data-chapter>
-        <p className="chapter-marker">{t.thesis.marker}</p>
+      <section className="principle chapter page-grid" id="services" data-chapter>
+        <p className="chapter-marker">{t.services.marker}</p>
         <div className="principle-heading">
-          <h2 data-reveal-heading>{t.thesis.title}</h2>
-          <p>{t.thesis.copy.split(" ").map((word, index) => <span className="word" key={`${word}-${index}`}>{word} </span>)}</p>
+          <h2 data-reveal-heading>{t.services.title}</h2>
+          <p>{t.services.copy.split(" ").map((word, index) => <span className="word" key={`${word}-${index}`}>{word} </span>)}</p>
         </div>
         <ol className="principle-list">
-          {t.thesis.principles.map((principle, index) => <li className="principle" key={principle}><span>0{index + 1}</span><strong>{principle}</strong><i /></li>)}
+          {t.services.items.map((service, index) => <li className="principle" key={service}><span>0{index + 1}</span><strong>{service}</strong><i /></li>)}
         </ol>
       </section>
 
@@ -711,14 +782,13 @@ export default function HomeClient({ locale: initialLocale }: { locale: SiteLoca
               <div className="case-index"><b>{study.number}</b><span>{study.chapter}</span><small>{study.field}</small></div>
               <div className="case-copy">
                 <h3>{study.title}</h3>
-                {[study.context, study.decision, study.architecture, study.outcome].map((paragraph, step) => (
+                {[study.context, study.decision, study.architecture, study.scope].map((paragraph, step) => (
                   <div className="case-step" key={t.work.labels[step]} data-step={step + 1}>
                     <span>0{step + 1} / {t.work.labels[step]}</span>
                     <p>{paragraph}</p>
                   </div>
                 ))}
                 <div className="case-tags">{study.tags.map((tag) => <span key={tag}>{tag}</span>)}</div>
-                {study.metric ? <div className="case-metric"><span><b>{study.metric.value}</b>{study.metric.label}</span></div> : null}
               </div>
               <div className="case-visual"><div className="case-visual-inner"><span className="visual-caption">{study.number} / LIVE SYSTEM MAP</span><CaseDiagram index={index} /></div></div>
             </article>
@@ -790,7 +860,9 @@ export default function HomeClient({ locale: initialLocale }: { locale: SiteLoca
         <div className="path-heading">
           <p className="chapter-marker">{t.path.marker}</p>
           <h2 data-reveal-heading>{t.path.title}</h2>
-          <p>{t.path.intro}</p>
+          <div className="path-intro">
+            {t.path.intro.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+          </div>
         </div>
         <div className="path-list">
           <div className="path-axis">
@@ -825,11 +897,6 @@ export default function HomeClient({ locale: initialLocale }: { locale: SiteLoca
                 </div>
                 <div className="path-duration">{entry.duration}</div>
                 <p>{entry.copy} <b>{entry.range}</b></p>
-                {entry.attrs ? (
-                  <div className="path-attrs">
-                    {entry.attrs.map((attr) => <span key={attr.k}><b>{attr.k}</b>{attr.v}</span>)}
-                  </div>
-                ) : null}
               </article>
             );
           })}
@@ -843,7 +910,7 @@ export default function HomeClient({ locale: initialLocale }: { locale: SiteLoca
         <div className="contact-copy">
           <h2 data-reveal-heading>{t.footer.title}</h2>
           <p>{t.footer.copy}</p>
-          <a href="mailto:viniciusromualdobusiness@gmail.com"><span>{t.footer.action}</span><Arrow /></a>
+          <a href={contactHref}><span>{t.footer.action}</span><Arrow /></a>
         </div>
         <svg className="contact-visual" viewBox="0 0 680 500" aria-hidden="true">
           <path className="contact-path" d="M26 68C172 68 174 250 328 250" /><path className="contact-path" d="M26 164C144 164 188 250 328 250" /><path className="contact-path" d="M26 336C144 336 188 250 328 250" /><path className="contact-path" d="M26 432C172 432 174 250 328 250" /><path className="contact-path" d="M328 250H650" />

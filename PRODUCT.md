@@ -6,15 +6,15 @@ brand
 
 ## Users
 
-Recruiters and engineering teams evaluating Vinicius Romualdo's experience, technical judgment, and fit for software engineering roles focused on financial products and distributed systems.
+International engineering leaders, product teams, recruiters, and AI-assisted resume systems looking for a full-stack software engineer with experience across web products, software architecture, distributed systems, legacy modernization, applied AI, and production reliability.
 
 ## Product Purpose
 
-Present Vinicius's professional experience, selected work, technical writing, and graduate research with enough clarity and credibility to support hiring conversations and engineering collaboration.
+Create qualified conversations about remote and international projects or roles. Selected systems, production experience at iFood, AI-assisted developer tooling, technical writing, and graduate research at USP provide concrete evidence of Vinicius's ability to understand trade-offs, design systems, and carry implementation into production.
 
 ## Brand Personality
 
-Reliable, technical, and precise. The voice should communicate experienced software engineering judgment, with particular authority in financial products and distributed systems.
+Reliable, technical, and decisive. The voice should communicate the judgment of a practicing full-stack engineer who is open to international collaboration, with particular authority in financial products, software systems, distributed architectures, and applied AI automation.
 
 ## Anti-references
 
@@ -23,6 +23,9 @@ Avoid generic SaaS templates, decorative card-heavy layouts, inflated claims, vi
 ## Design Principles
 
 - Lead with concrete engineering outcomes and evidence.
+- Present Vinicius as a full-stack engineer whose current focus is software systems and applied AI, while preserving backend depth as supporting evidence.
+- Ground AI terminology in concrete systems, especially Model Context Protocol integrations, developer tooling, workflow automation, and service decommissioning.
+- Make availability for remote and international projects explicit without positioning Vinicius as a consultant or agency.
 - Make complex systems work easy to understand quickly.
 - Pair technical authority with direct, approachable language.
 - Use visual distinction to reinforce personal identity, not decoration.
