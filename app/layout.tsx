@@ -5,10 +5,7 @@ import "./globals.css";
 import { resolveSiteLocale } from "./i18n";
 
 const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ??
-  (process.env.VERCEL_PROJECT_PRODUCTION_URL
-    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-    : "http://localhost:3000");
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://viniromualdo.com";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,29 +21,52 @@ export async function generateMetadata(): Promise<Metadata> {
   const locale = resolveSiteLocale(await headers());
   const isPortuguese = locale === "pt-BR";
   const title = isPortuguese
-    ? "Vinícius Romualdo | Engenharia de Software, Fintech e Sistemas Distribuídos"
-    : "Vinícius Romualdo | Fintech & Distributed Systems Engineer";
+    ? "Vinícius Romualdo | Full-stack, Sistemas Distribuídos e AI Aplicada"
+    : "Vinícius Romualdo | Full-stack, Distributed Systems & Applied AI";
   const description = isPortuguese
-    ? "Engenheiro de Software no iFood construindo sistemas financeiros e distribuídos confiáveis com Go, Kotlin e arquitetura orientada a eventos."
-    : "Software Engineer at iFood building reliable financial and distributed systems with Go, Kotlin and event-driven architecture. Based in Brazil.";
+    ? "Engenheiro de Software Full-stack no iFood e mestrando na USP, com experiência em produtos web, arquitetura de software, sistemas distribuídos, automação com AI e Model Context Protocol (MCP). Aberto a projetos remotos e internacionais."
+    : "Full-stack Software Engineer at iFood and M.Sc. candidate at USP with experience in web products, software architecture, distributed systems, AI automation, and Model Context Protocol (MCP). Open to remote and international projects.";
 
   return {
     metadataBase: new URL(siteUrl),
     title: {
       default: title,
-      template: "%s | Vinicius Romualdo",
+      template: "%s | Vinícius Romualdo",
     },
     description,
     keywords: [
       "Vinícius Romualdo",
       "Software Engineer",
+      "Full-stack Software Engineer",
+      "Full Stack Engineer",
+      "Full-stack Development",
+      "Frontend Development",
+      "Backend Software Engineer",
+      "Software Architecture",
+      "Legacy Modernization",
       "Fintech Engineer",
       "Distributed Systems",
-      "Backend Engineer",
+      "Remote Software Engineer",
+      "International Software Projects",
       "Go",
       "Kotlin",
+      "TypeScript",
+      "React",
+      "Next.js",
+      "Web Platforms",
       "Event-driven Architecture",
       "Microservices",
+      "Artificial Intelligence",
+      "Applied AI",
+      "AI Engineering",
+      "Generative AI",
+      "AI Automation",
+      "Model Context Protocol",
+      "Model Context Protocol (MCP)",
+      "MCP Servers",
+      "Developer Tooling",
+      "Workflow Automation",
+      "Service Decommissioning",
     ],
     authors: [{ name: "Vinícius Romualdo" }],
     creator: "Vinícius Romualdo",
@@ -62,12 +82,12 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
       images: [
         {
-          url: "/vinicius-romualdo-og.png",
+          url: "/vinicius-romualdo-og-fullstack.png",
           width: 1200,
           height: 630,
           alt: isPortuguese
-            ? "Vinícius Romualdo, Engenheiro de Software especializado em sistemas financeiros e distribuídos"
-            : "Vinícius Romualdo, Software Engineer focused on financial and distributed systems",
+            ? "Vinícius Romualdo, Engenheiro de Software Full-stack com foco em sistemas distribuídos e AI aplicada"
+            : "Vinícius Romualdo, Full-stack Software Engineer focused on distributed systems and applied AI",
         },
       ],
     },
@@ -75,7 +95,7 @@ export async function generateMetadata(): Promise<Metadata> {
       card: "summary_large_image",
       title,
       description,
-      images: ["/vinicius-romualdo-og.png"],
+      images: ["/vinicius-romualdo-og-fullstack.png"],
     },
     robots: {
       index: true,
@@ -94,12 +114,88 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const locale = resolveSiteLocale(await headers());
+  const structuredProfile = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: "Vinícius Romualdo",
+    url: siteUrl,
+    email: "mailto:viniciusromualdobusiness@gmail.com",
+    jobTitle: "Full-stack Software Engineer",
+    description: "Full-stack Software Engineer working on web products, software architecture, distributed systems, production reliability, and AI-assisted developer tooling, including Model Context Protocol integrations.",
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: "São Carlos",
+      addressRegion: "SP",
+      addressCountry: "BR",
+    },
+    worksFor: {
+      "@type": "Organization",
+      name: "iFood",
+    },
+    affiliation: {
+      "@type": "CollegeOrUniversity",
+      name: "Universidade de São Paulo",
+    },
+    sameAs: [
+      "https://www.linkedin.com/in/vinimrs/",
+      "https://github.com/vinimrs",
+      "https://medium.com/@viniciusromualdobusiness",
+    ],
+    knowsAbout: [
+      "Software architecture",
+      "Full-stack engineering",
+      "Frontend development",
+      "Web platforms",
+      "React",
+      "Next.js",
+      "Backend engineering",
+      "Legacy modernization",
+      "Distributed systems",
+      "Production reliability",
+      "Artificial intelligence",
+      "Applied AI",
+      "Generative AI",
+      "AI-assisted automation",
+      "Model Context Protocol (MCP)",
+      "MCP servers",
+      "Developer tooling",
+      "Workflow automation",
+      "Service decommissioning",
+    ],
+    hasOccupation: {
+      "@type": "Occupation",
+      name: "Full-stack Software Engineer",
+      skills: [
+        "Full-stack product engineering",
+        "Frontend development",
+        "React",
+        "Next.js",
+        "Backend architecture",
+        "Distributed systems",
+        "Go",
+        "Kotlin",
+        "TypeScript",
+        "Event-driven architecture",
+        "Artificial Intelligence (AI)",
+        "Generative AI",
+        "Model Context Protocol (MCP)",
+        "AI automation",
+        "Developer tooling",
+      ],
+    },
+  };
 
   return (
     <html lang={locale}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(structuredProfile).replace(/</g, "\\u003c"),
+          }}
+        />
         {children}
       </body>
     </html>

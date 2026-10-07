@@ -20,6 +20,20 @@ npm run lint
 npm run build
 ```
 
+## Currículo
+
+O currículo exibido no site é gerado por `scripts/generate_resume.py` e salvo
+em `public/vinicius-romualdo-resume.pdf`.
+
+Para regenerá-lo, execute:
+
+```bash
+npm run resume
+```
+
+O comando usa `uv` para instalar a versão declarada do ReportLab em um ambiente
+isolado. As durações dos cargos atuais são recalculadas automaticamente.
+
 ## Publicação na Vercel
 
 1. Importe este repositório em https://vercel.com/new.
@@ -35,4 +49,4 @@ publicação em produção. Pull requests recebem URLs de preview isoladas.
 
 Os metadados ficam em `app/layout.tsx`. A imagem utilizada por LinkedIn,
 WhatsApp e outras redes fica em
-`public/vinicius-romualdo-og.png`.
+`public/vinicius-romualdo-og-fullstack.png`.
