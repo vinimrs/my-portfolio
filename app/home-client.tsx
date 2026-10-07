@@ -82,6 +82,84 @@ function durationSince(year: number, zeroBasedMonth: number, locale: SiteLocale)
   return [years ? `${years} yr` : "", months ? `${months} mo` : ""].filter(Boolean).join(" ");
 }
 
+function MotionWord({ text }: { text: string }) {
+  return (
+    <span className="hero-word">
+      {Array.from(text).map((character, index) => (
+        <span className="hero-char" key={`${character}-${index}`}>
+          {character}
+        </span>
+      ))}
+    </span>
+  );
+}
+
+function ServiceReel({ items, locale }: { items: string[]; locale: SiteLocale }) {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const [isInView, setIsInView] = useState(false);
+  const reelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const reel = reelRef.current;
+    if (!reel) return;
+
+    const observer = new IntersectionObserver(([entry]) => {
+      setIsInView(entry.isIntersecting);
+    }, { threshold: 0.45 });
+
+    observer.observe(reel);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reducedMotion || isPaused || !isInView) return;
+
+    const interval = window.setInterval(() => {
+      setActiveIndex((current) => (current + 1) % items.length);
+    }, 2800);
+
+    return () => window.clearInterval(interval);
+  }, [isInView, isPaused, items.length]);
+
+  const controlLabel = locale === "pt-BR" ? "Escolher especialidade" : "Choose expertise";
+
+  return (
+    <div
+      ref={reelRef}
+      className={`principle-reel${isInView ? " is-in-view" : ""}${isPaused ? " is-paused" : ""}`}
+      onFocus={() => setIsPaused(true)}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setIsPaused(false);
+      }}
+    >
+      <div className="principle-reel__stage">
+        <div className="principle-reel__item" key={`${locale}-${activeIndex}`}>
+          <span>{String(activeIndex + 1).padStart(2, "0")}</span>
+          <strong>{items[activeIndex]}</strong>
+          <small>{String(activeIndex + 1).padStart(2, "0")}—{String(items.length).padStart(2, "0")}</small>
+        </div>
+        <i className="principle-reel__progress" aria-hidden="true" key={`progress-${locale}-${activeIndex}-${isInView}`} />
+      </div>
+      <div className="principle-reel__controls" aria-label={controlLabel}>
+        {items.map((item, index) => (
+          <button
+            className={index === activeIndex ? "is-active" : ""}
+            type="button"
+            aria-label={item}
+            aria-pressed={index === activeIndex}
+            onClick={() => setActiveIndex(index)}
+            key={item}
+          >
+            {String(index + 1).padStart(2, "0")}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 const copy: Record<SiteLocale, LocaleCopy> = {
   en: {
     skip: "Skip to the story",
@@ -90,16 +168,16 @@ const copy: Record<SiteLocale, LocaleCopy> = {
       eyebrow: "Software engineering · Full-stack systems & applied AI",
       role: "FULL-STACK SOFTWARE ENGINEER",
       focus: "FULL-STACK ENGINEERING · DISTRIBUTED SYSTEMS · APPLIED AI · RELIABILITY",
-      statement: "I build and evolve software systems under real production constraints.",
-      intro: "My work spans full-stack product engineering, software architecture, web platforms, distributed flows, legacy modernization, and AI-assisted developer tooling that must remain understandable and reliable in production. I am open to remote and international projects.",
-      explore: "Discuss a project",
+      statement: "I help teams make difficult software systems clearer, safer, and ready to evolve.",
+      intro: "From product interfaces to distributed services, I turn technical complexity into reliable systems that teams can understand and move forward.",
+      explore: "Discuss a challenge",
       availability: `${durationSince(2024, 2, "en")} at iFood · M.Sc. candidate in Computer Science at USP`,
-      location: "São Carlos, Brazil · Open to remote and international projects",
+      location: "São Carlos, Brazil",
     },
     services: {
       marker: "00 / Engineering approach",
-      title: "Engineering that leads to clear technical decisions.",
-      copy: "I work across user-facing products, internal platforms, and critical distributed systems where architecture and production trade-offs need to be explicit. My approach connects product context, system design, and implementation.",
+      title: "Engineering for clear technical decisions.",
+      copy: "I connect product context, system design, and implementation to move complex software forward with clear trade-offs.",
       items: [
         "Full-stack product engineering and system design",
         "Software architecture, modernization, and integration",
@@ -110,7 +188,7 @@ const copy: Record<SiteLocale, LocaleCopy> = {
     work: {
       marker: "01 / Selected systems",
       title: "Real problems, technical decisions, and production outcomes.",
-      intro: "Four examples of systems I have worked on directly, from architectural design to rollout and observability.",
+      intro: "Four systems I helped move from technical direction to production.",
       confidentiality: "Some details are intentionally generalized to protect product confidentiality.",
       labels: ["Problem", "Direction", "System", "Scope"],
       cases: [
@@ -163,8 +241,8 @@ const copy: Record<SiteLocale, LocaleCopy> = {
     research: {
       marker: "02 / Research & technical authority",
       title: "Research that sharpens how I design production systems.",
-      copy: "At USP, I investigate how microservices can detect attacks, adapt their behavior, and recover with less human intervention. The work connects self-protection, self-healing, MAPE-K, and distributed-system security.",
-      thesis: "This research informs how I approach observability, feedback loops, safe automation, and recovery in production.",
+      copy: "At USP, I study how microservices can detect attacks, adapt, and recover with less human intervention.",
+      thesis: "It turns observability, feedback loops, and recovery into practical design tools.",
       tags: ["Architecture paper accepted at AISecDev 2026", "Experiment in progress"],
       imageAlt: "Entrance to the EESC-USP campus in São Carlos, where Vinícius develops his master's research",
       imageCaption: "EESC-USP · São Carlos · Personal archive",
@@ -173,8 +251,8 @@ const copy: Record<SiteLocale, LocaleCopy> = {
       marker: "03 / Trajectory",
       title: "From research to production—and back to research.",
       intro: [
-        "My path began in São Carlos, building systems for mental-health research at UFSCar and later continuing that work with FAPESP funding. I then brought that foundation in architecture and delivery into financial products at iFood.",
-        "Today, also based in São Carlos, I combine production engineering with my master’s research at USP. They are different paths guided by the same question: how do we keep software reliable as complexity grows?",
+        "My work began in research software at UFSCar, then moved into financial products and distributed systems at iFood.",
+        "Today, production engineering and my M.Sc. research at USP shape the same pursuit: software that stays reliable as complexity grows.",
       ],
       axisSpan: "span",
       axisDuration: "duration",
@@ -204,11 +282,11 @@ const copy: Record<SiteLocale, LocaleCopy> = {
       footnote: "Spring Boot · Clean Architecture · Trade-offs",
     },
     footer: {
-      marker: "04 / Remote & international projects",
-      title: "Working on a difficult software or AI system?",
-      copy: "I am open to remote and international projects involving full-stack product engineering, software architecture, distributed systems, legacy modernization, applied AI, or production reliability. If the work is a good fit, I would like to hear about the system and the team behind it.",
-      action: "Discuss a project",
-      location: "São Carlos, Brazil · Open to remote collaboration",
+      marker: "04 / Next challenge",
+      title: "Does a software system need a clearer path forward?",
+      copy: "Share the challenge. I can help find a clear technical path.",
+      action: "Share the challenge",
+      location: "São Carlos, Brazil",
       back: "Back to top",
     },
   },
@@ -219,16 +297,16 @@ const copy: Record<SiteLocale, LocaleCopy> = {
       eyebrow: "Engenharia de software · Sistemas full-stack e AI aplicada",
       role: "ENGENHEIRO DE SOFTWARE FULL-STACK",
       focus: "ENGENHARIA FULL-STACK · SISTEMAS DISTRIBUÍDOS · AI APLICADA · CONFIABILIDADE",
-      statement: "Construo e evoluo sistemas de software sob restrições reais de produção.",
-      intro: "Minha atuação envolve engenharia de produto full-stack, arquitetura de software, plataformas web, fluxos distribuídos, modernização de sistemas legados e ferramentas internas apoiadas por AI que precisam permanecer compreensíveis e confiáveis em produção. Estou aberto a projetos remotos e internacionais.",
-      explore: "Conversar sobre um projeto",
+      statement: "Ajudo times a tornar sistemas difíceis mais claros, confiáveis e prontos para evoluir.",
+      intro: "Do produto aos serviços distribuídos, transformo complexidade técnica em sistemas que o time entende, opera e consegue levar adiante.",
+      explore: "Conversar sobre um desafio",
       availability: `${durationSince(2024, 2, "pt-BR")} no iFood · Mestrando em Ciência da Computação na USP`,
-      location: "São Carlos, Brasil · Aberto a projetos remotos e internacionais",
+      location: "São Carlos, Brasil",
     },
     services: {
       marker: "00 / Como atuo",
-      title: "Engenharia que leva a decisões técnicas claras.",
-      copy: "Atuo em produtos digitais, plataformas internas e sistemas distribuídos críticos nos quais arquitetura e decisões de produção precisam ser explícitas. Meu trabalho conecta contexto de produto, desenho de sistemas e implementação.",
+      title: "Engenharia para decisões técnicas claras.",
+      copy: "Conecto contexto de produto, desenho de sistemas e implementação para fazer software complexo avançar com trade-offs claros.",
       items: [
         "Engenharia de produto full-stack e desenho de sistemas",
         "Arquitetura de software, modernização e integração",
@@ -239,7 +317,7 @@ const copy: Record<SiteLocale, LocaleCopy> = {
     work: {
       marker: "01 / Sistemas selecionados",
       title: "Problemas reais, decisões técnicas e resultados em produção.",
-      intro: "Quatro exemplos de sistemas nos quais atuei diretamente, da definição arquitetural ao rollout e à observabilidade.",
+      intro: "Quatro sistemas que ajudei a levar da direção técnica à produção.",
       confidentiality: "Alguns detalhes foram generalizados para preservar a confidencialidade dos produtos.",
       labels: ["Problema", "Direcionamento", "Sistema", "Atuação"],
       cases: [
@@ -292,8 +370,8 @@ const copy: Record<SiteLocale, LocaleCopy> = {
     research: {
       marker: "02 / Pesquisa e autoridade técnica",
       title: "Pesquisa que influencia a forma como projeto sistemas em produção.",
-      copy: "Na USP, investigo como microsserviços podem detectar ataques, adaptar seu comportamento e se recuperar com menor intervenção humana. O trabalho conecta autoproteção, autorrecuperação, MAPE-K e segurança de arquiteturas distribuídas.",
-      thesis: "Essa pesquisa fortalece minha atuação prática em observabilidade, ciclos de feedback, automação segura e estratégias de recuperação.",
+      copy: "Na USP, estudo como microsserviços podem detectar ataques, adaptar-se e se recuperar com menos intervenção humana.",
+      thesis: "Isso transforma observabilidade, ciclos de feedback e recuperação em ferramentas práticas de projeto.",
       tags: ["Artigo sobre a arquitetura aceito no AISecDev 2026", "Experimento em andamento"],
       imageAlt: "Entrada da EESC-USP em São Carlos, onde Vinícius desenvolve sua pesquisa de mestrado",
       imageCaption: "EESC-USP · São Carlos · Arquivo pessoal",
@@ -302,8 +380,8 @@ const copy: Record<SiteLocale, LocaleCopy> = {
       marker: "03 / Trajetória",
       title: "Da pesquisa à produção e de volta à pesquisa.",
       intro: [
-        "Minha trajetória começou em São Carlos, com o desenvolvimento de sistemas para pesquisas em saúde mental na UFSCar e com um projeto financiado pela FAPESP. Depois, levei essa base de arquitetura e entrega para produtos financeiros no iFood.",
-        "Hoje, também em São Carlos, concilio a construção de sistemas financeiros em produção com a pesquisa de mestrado na USP. São duas frentes diferentes, mas orientadas pela mesma pergunta: como construir software que continue confiável quando a complexidade aumenta?",
+        "Minha trajetória começou em software para pesquisa na UFSCar e avançou para produtos financeiros e sistemas distribuídos no iFood.",
+        "Hoje, engenharia em produção e pesquisa de mestrado na USP orientam a mesma busca: software confiável mesmo com a complexidade crescendo.",
       ],
       axisSpan: "span",
       axisDuration: "duração",
@@ -333,11 +411,11 @@ const copy: Record<SiteLocale, LocaleCopy> = {
       footnote: "Spring Boot · Clean Architecture · Trade-offs",
     },
     footer: {
-      marker: "04 / Projetos remotos e internacionais",
-      title: "Trabalhando em um sistema de software ou AI desafiador?",
-      copy: "Estou aberto a projetos remotos e internacionais em engenharia de produto full-stack, arquitetura de software, sistemas distribuídos, modernização de legado, AI aplicada ou confiabilidade em produção. Se houver alinhamento, quero conhecer o sistema e o time por trás dele.",
-      action: "Conversar sobre um projeto",
-      location: "São Carlos, Brasil · Colaboração remota",
+      marker: "04 / Próximo desafio",
+      title: "Um sistema de software precisa de um caminho mais claro?",
+      copy: "Conte o desafio. Posso ajudar a encontrar um caminho técnico claro.",
+      action: "Falar sobre o desafio",
+      location: "São Carlos, Brasil",
       back: "Voltar ao topo",
     },
   },
@@ -510,8 +588,12 @@ export default function HomeClient({ locale: initialLocale }: { locale: SiteLoca
   const [locale, setLocale] = useState<SiteLocale>(initialLocale === "en" ? initialLocale : "en");
   const [time, setTime] = useState("");
   const [activeChapter, setActiveChapter] = useState("top");
+  const [isPageComplete, setIsPageComplete] = useState(false);
   const root = useRef<HTMLElement>(null);
+  const pageEndRef = useRef<HTMLSpanElement>(null);
   const t = copy[locale];
+  const heroSkills = t.hero.focus.split(" · ");
+  const heroSkillsLabel = locale === "pt-BR" ? "Habilidades principais" : "Core capabilities";
 
   useEffect(() => {
     document.documentElement.lang = locale;
@@ -520,6 +602,18 @@ export default function HomeClient({ locale: initialLocale }: { locale: SiteLoca
     const interval = window.setInterval(updateTime, 30_000);
     return () => window.clearInterval(interval);
   }, [locale]);
+
+  useEffect(() => {
+    const pageEnd = pageEndRef.current;
+    if (!pageEnd) return;
+
+    const observer = new IntersectionObserver(([entry]) => {
+      setIsPageComplete(entry.isIntersecting);
+    }, { threshold: 1 });
+
+    observer.observe(pageEnd);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     // PRODUCT.md commits to reduced-motion alternatives: skip the whole
@@ -537,16 +631,106 @@ export default function HomeClient({ locale: initialLocale }: { locale: SiteLoca
       gsap.registerPlugin(ScrollTrigger);
 
       const context = gsap.context(() => {
-        gsap.set(".hero-word", { yPercent: 112 });
-        gsap.set(".hero-meta, .hero-intro, .hero-status", { autoAlpha: 0, y: 24 });
+        ScrollTrigger.create({
+          trigger: ".threshold--in",
+          start: "center center",
+          onEnter: () => {
+            const hasUserActivation = navigator.userActivation?.hasBeenActive ?? true;
+
+            if (
+              document.visibilityState === "visible" &&
+              hasUserActivation &&
+              typeof navigator.vibrate === "function"
+            ) {
+              navigator.vibrate(18);
+            }
+          },
+        });
+
+        gsap.set(".hero-char", {
+          autoAlpha: 0,
+          filter: "blur(4px)",
+          rotateX: -24,
+          transformOrigin: "50% 100%",
+          yPercent: 76,
+        });
+        gsap.set(".hero-name__scan", { autoAlpha: 0, transformOrigin: "50% 50%", x: 0, y: 0 });
+        gsap.set(".hero-skill", { autoAlpha: 0, rotateX: -18, transformOrigin: "50% 50%", yPercent: 75 });
+        gsap.set(".hero-skill:first-child", { autoAlpha: 1, rotateX: 0, yPercent: 0 });
+        gsap.set(".hero-meta, .hero-intro, .hero-role, .hero-status", { autoAlpha: 0, y: 24 });
         gsap.set(".draw-path", { strokeDasharray: 900, strokeDashoffset: 900 });
         gsap.set(".topology-node", { scale: 0, transformOrigin: "center" });
 
-        gsap.timeline({ defaults: { ease: "power4.out" } })
-          .to(".hero-word", { yPercent: 0, duration: 1.3, stagger: 0.09 })
-          .to(".hero-meta, .hero-intro, .hero-status", { autoAlpha: 1, y: 0, duration: 0.9, stagger: 0.08 }, "-=0.8")
+        const heroNameType = document.querySelector<HTMLElement>(".hero-name__type");
+        const heroChars = Array.from(document.querySelectorAll<HTMLElement>(".hero-char"));
+        const nameTimeline = gsap.timeline({ defaults: { ease: "power4.out" } });
+
+        nameTimeline
+          .to(".hero-char", {
+            autoAlpha: 1,
+            filter: "blur(0px)",
+            rotateX: 0,
+            yPercent: 0,
+            duration: 1.02,
+            stagger: 0.045,
+          })
+          .to(".hero-meta, .hero-intro, .hero-role, .hero-status", { autoAlpha: 1, y: 0, duration: 0.9, stagger: 0.08 }, "-=0.68")
           .to(".hero-topology .draw-path", { strokeDashoffset: 0, duration: 1.7, stagger: 0.12 }, "-=1.15")
           .to(".topology-node", { scale: 1, duration: 0.55, stagger: 0.06, ease: "back.out(2)" }, "-=1.3");
+
+        const signalLoop = gsap.timeline({ delay: 1.6, repeat: -1, repeatDelay: 1.05, repeatRefresh: true });
+        const cursorStep = 0.17;
+        signalLoop.set(".hero-name__scan", {
+          autoAlpha: 0,
+          height: () => (heroChars[0]?.getBoundingClientRect().height ?? 0) * 0.78,
+        });
+        heroChars.forEach((character, index) => {
+          const position = index * cursorStep;
+          signalLoop
+            .to(".hero-name__scan", {
+              autoAlpha: 0.62,
+              x: () => {
+                const nameBounds = heroNameType?.getBoundingClientRect();
+                const characterBounds = character.getBoundingClientRect();
+                return nameBounds ? characterBounds.right - nameBounds.left + 3 : 0;
+              },
+              y: () => {
+                const nameBounds = heroNameType?.getBoundingClientRect();
+                const characterBounds = character.getBoundingClientRect();
+                return nameBounds ? characterBounds.top - nameBounds.top + characterBounds.height * 0.11 : 0;
+              },
+              duration: index === 0 ? 0.3 : 0.2,
+              ease: "power2.inOut",
+            }, position)
+            .to(character, { color: "color-mix(in oklab, var(--ink), var(--cobalt) 62%)", duration: 0.2 }, position)
+            .to(character, { color: "var(--ink)", duration: 0.55 }, position + 0.2);
+        });
+        signalLoop.to(".hero-name__scan", { autoAlpha: 0, duration: 0.3, ease: "power2.out" }, heroChars.length * cursorStep + 0.18);
+
+        const heroSkillItems = Array.from(document.querySelectorAll<HTMLElement>(".hero-skill"));
+        const skillsLoop = gsap.timeline({ delay: 1.65, repeat: -1 });
+        heroSkillItems.forEach((skill, index) => {
+          const nextSkill = heroSkillItems[(index + 1) % heroSkillItems.length];
+          skillsLoop
+            .to(skill, { autoAlpha: 0, rotateX: 16, yPercent: -72, duration: 0.52, ease: "power3.inOut" }, index === 0 ? "+=2.1" : ">+=2.1")
+            .fromTo(
+              nextSkill,
+              { autoAlpha: 0, rotateX: -16, yPercent: 72 },
+              { autoAlpha: 1, rotateX: 0, yPercent: 0, duration: 0.64, ease: "power4.out", immediateRender: false },
+              "<0.08",
+            )
+            .set(skill, { rotateX: -16, yPercent: 72 });
+        });
+
+        ScrollTrigger.create({
+          trigger: ".hero",
+          start: "top bottom",
+          end: "bottom top",
+          onEnter: () => { signalLoop.resume(); skillsLoop.resume(); },
+          onEnterBack: () => { signalLoop.resume(); skillsLoop.resume(); },
+          onLeave: () => { signalLoop.pause(); skillsLoop.pause(); },
+          onLeaveBack: () => { signalLoop.pause(); skillsLoop.pause(); },
+        });
 
         gsap.timeline({
           scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: 1.1 },
@@ -666,7 +850,49 @@ export default function HomeClient({ locale: initialLocale }: { locale: SiteLoca
           gsap.to(".hero-topology", { x, y, duration: 1.2, ease: "power3.out", overwrite: "auto" });
         };
         hero?.addEventListener("pointermove", moveField);
-        dispose = () => hero?.removeEventListener("pointermove", moveField);
+
+        const precisePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
+        let charCenters: Array<{ x: number; y: number }> = [];
+
+        const measureCharacters = () => {
+          charCenters = heroChars.map((character) => {
+            const bounds = character.getBoundingClientRect();
+            return { x: bounds.left + bounds.width / 2, y: bounds.top + bounds.height / 2 };
+          });
+        };
+        const moveName = (event: PointerEvent) => {
+          heroChars.forEach((character, index) => {
+            const center = charCenters[index];
+            if (!center) return;
+            const dx = event.clientX - center.x;
+            const dy = (event.clientY - center.y) * 0.7;
+            const influence = Math.max(0, 1 - Math.hypot(dx, dy) / 150);
+            gsap.to(character, {
+              y: -7 * influence,
+              duration: 0.5,
+              ease: "power3.out",
+              overwrite: "auto",
+            });
+          });
+        };
+        const resetName = () => {
+          gsap.to(heroChars, { y: 0, duration: 0.5, ease: "power3.out", overwrite: "auto" });
+        };
+
+        if (heroNameType && precisePointer.matches) {
+          heroNameType.addEventListener("pointerenter", measureCharacters);
+          heroNameType.addEventListener("pointermove", moveName);
+          heroNameType.addEventListener("pointerleave", resetName);
+          window.addEventListener("resize", measureCharacters);
+        }
+
+        dispose = () => {
+          hero?.removeEventListener("pointermove", moveField);
+          heroNameType?.removeEventListener("pointerenter", measureCharacters);
+          heroNameType?.removeEventListener("pointermove", moveName);
+          heroNameType?.removeEventListener("pointerleave", resetName);
+          window.removeEventListener("resize", measureCharacters);
+        };
       }, root);
 
       ScrollTrigger.refresh();
@@ -684,12 +910,12 @@ export default function HomeClient({ locale: initialLocale }: { locale: SiteLoca
   }, [locale]);
 
   const chapters = [
-    ["top", locale === "pt-BR" ? "Início" : "Index"],
-    ["services", locale === "pt-BR" ? "Como posso ajudar" : "How I can help"],
-    ["work", t.nav.work],
-    ["research", locale === "pt-BR" ? "Pesquisa" : "Research"],
-    ["path", t.nav.path],
-    ["contact", t.nav.contact],
+    ["top", "", locale === "pt-BR" ? "Início" : "Index"],
+    ["services", "00", locale === "pt-BR" ? "Como posso ajudar" : "How I can help"],
+    ["work", "01", t.nav.work],
+    ["research", "02", locale === "pt-BR" ? "Pesquisa" : "Research"],
+    ["path", "03", t.nav.path],
+    ["contact", "04", t.nav.contact],
   ];
 
   return (
@@ -703,10 +929,15 @@ export default function HomeClient({ locale: initialLocale }: { locale: SiteLoca
         <span className="story-progress__packet" />
       </div>
       <div className="edge-blur" aria-hidden="true" />
+      <div className={`page-completion${isPageComplete ? " is-complete" : ""}`} aria-hidden="true">
+        <i className="page-completion__edge page-completion__edge--top" />
+        <i className="page-completion__edge page-completion__edge--right" />
+        <i className="page-completion__edge page-completion__edge--bottom" />
+        <i className="page-completion__edge page-completion__edge--left" />
+      </div>
 
       <header className="site-header">
         <a className="brand" href="#top" aria-label="Vinícius Romualdo, home"><span>VR</span><i>®</i></a>
-        <div className="wordmark">Vinícius Romualdo</div>
         <nav aria-label={locale === "pt-BR" ? "Navegação principal" : "Main navigation"}>
           <a href="#services">{t.nav.services}</a>
           <a href="#work">{t.nav.work}</a>
@@ -722,10 +953,10 @@ export default function HomeClient({ locale: initialLocale }: { locale: SiteLoca
 
       <aside className="chapter-rail" aria-label={locale === "pt-BR" ? "Capítulos" : "Chapters"}>
         <div className="chapter-rail__line" />
-        {chapters.map(([id, label], index) => (
+        {chapters.map(([id, chapterIndex, label]) => (
           <a href={`#${id}`} className={activeChapter === id ? "is-active" : ""} key={id}>
             <i />
-            <span>{String(index + 1).padStart(2, "0")} · {label}</span>
+            <span>{chapterIndex ? `${chapterIndex} · ` : ""}{label}</span>
           </a>
         ))}
       </aside>
@@ -735,13 +966,24 @@ export default function HomeClient({ locale: initialLocale }: { locale: SiteLoca
           <span>{t.hero.eyebrow}</span>
           <span>{t.hero.location} · {time} BRT</span>
         </div>
-        <h1 className="hero-name">
-          <div className="hero-line"><span className="hero-word">Vinícius</span></div>
-          <div className="hero-line"><span className="hero-word">Romualdo</span></div>
-          <span className="hero-role">{t.hero.role}</span>
-        </h1>
+        <div className="hero-identity">
+          <h1 className="hero-name" aria-label={`Vinícius Romualdo — ${t.hero.role}`}>
+            <span className="hero-name__type" aria-hidden="true">
+              <span className="hero-line"><MotionWord text="Vinícius" /></span>
+              <span className="hero-line"><MotionWord text="Romualdo" /></span>
+              <span className="hero-name__scan" />
+            </span>
+            <span className="hero-role">{t.hero.role}</span>
+          </h1>
+          <div className="hero-skills" aria-label={`${heroSkillsLabel}: ${heroSkills.join(", ")}`}>
+            <span className="hero-skills__label" aria-hidden="true">{heroSkillsLabel}</span>
+            <span className="hero-skills__viewport" aria-hidden="true">
+              {heroSkills.map((skill) => <span className="hero-skill" key={skill}>{skill}</span>)}
+            </span>
+            <span className="hero-skills__count" aria-hidden="true">01—{String(heroSkills.length).padStart(2, "0")}</span>
+          </div>
+        </div>
         <div className="hero-visual"><HeroTopology /></div>
-        <p className="hero-focus">{t.hero.focus}</p>
         <div className="hero-intro">
           <strong>{t.hero.statement}</strong>
           <p>{t.hero.intro}</p>
@@ -756,9 +998,7 @@ export default function HomeClient({ locale: initialLocale }: { locale: SiteLoca
           <h2 data-reveal-heading>{t.services.title}</h2>
           <p>{t.services.copy.split(" ").map((word, index) => <span className="word" key={`${word}-${index}`}>{word} </span>)}</p>
         </div>
-        <ol className="principle-list">
-          {t.services.items.map((service, index) => <li className="principle" key={service}><span>0{index + 1}</span><strong>{service}</strong><i /></li>)}
-        </ol>
+        <ServiceReel items={t.services.items} locale={locale} key={locale} />
       </section>
 
       <section className="threshold threshold--in">
@@ -923,6 +1163,7 @@ export default function HomeClient({ locale: initialLocale }: { locale: SiteLoca
           <a href="#top">{t.footer.back} <Arrow direction="up" /></a>
         </div>
       </footer>
+      <span className="page-end-sentinel" ref={pageEndRef} aria-hidden="true" />
     </main>
   );
 }
